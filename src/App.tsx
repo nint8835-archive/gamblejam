@@ -163,7 +163,7 @@ function App() {
                         <DicesIcon className="mr-2" /> Roll
                     </button>
                     <button
-                        className="w-fu flex justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-4 hover:from-emerald-600 hover:to-emerald-900"
+                        className="flex justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-4 hover:from-emerald-600 hover:to-emerald-900"
                         onClick={sort}
                     >
                         <ArrowUpDownIcon />
