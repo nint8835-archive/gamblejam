@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { cn, countNumbers } from './util';
+import { cn, countNumbers, NumberCounts, range } from './util';
 
 function Die({ value }: { value: number }) {
     return (
@@ -34,32 +34,32 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
     {
         name: 'Aces',
         description: 'Any number of "1"s',
-        scoreFunc: (dice) => dice.filter((die) => die === 1).reduce((acc, num) => acc + num, 0),
+        scoreFunc: (dice) => countNumbers(dice)[1],
     },
     {
         name: 'Twos',
         description: 'Any number of "2"s',
-        scoreFunc: (dice) => dice.filter((die) => die === 2).reduce((acc, num) => acc + num, 0),
+        scoreFunc: (dice) => countNumbers(dice)[2] * 2,
     },
     {
         name: 'Threes',
         description: 'Any number of "3"s',
-        scoreFunc: (dice) => dice.filter((die) => die === 3).reduce((acc, num) => acc + num, 0),
+        scoreFunc: (dice) => countNumbers(dice)[3] * 3,
     },
     {
         name: 'Fours',
         description: 'Any number of "4"s',
-        scoreFunc: (dice) => dice.filter((die) => die === 4).reduce((acc, num) => acc + num, 0),
+        scoreFunc: (dice) => countNumbers(dice)[4] * 4,
     },
     {
         name: 'Fives',
         description: 'Any number of "5"s',
-        scoreFunc: (dice) => dice.filter((die) => die === 5).reduce((acc, num) => acc + num, 0),
+        scoreFunc: (dice) => countNumbers(dice)[5] * 5,
     },
     {
         name: 'Sixes',
         description: 'Any number of "6"s',
-        scoreFunc: (dice) => dice.filter((die) => die === 6).reduce((acc, num) => acc + num, 0),
+        scoreFunc: (dice) => countNumbers(dice)[6] * 6,
     },
     {
         name: 'Chance',
@@ -70,7 +70,7 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
         name: 'Three of a Kind',
         description: 'At least three dice the same',
         scoreFunc: (dice) => {
-            const threeOfAKind = Array.from(countNumbers(dice).values()).find((count) => count >= 3);
+            const threeOfAKind = Object.values(countNumbers(dice)).find((count) => count >= 3);
             return threeOfAKind ? dice.filter((die) => die !== null).reduce((acc, num) => acc + num, 0) : 0;
         },
     },
@@ -78,7 +78,7 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
         name: 'Four of a Kind',
         description: 'At least four dice the same',
         scoreFunc: (dice) => {
-            const fourOfAKind = Array.from(countNumbers(dice).values()).find((count) => count >= 4);
+            const fourOfAKind = Object.values(countNumbers(dice)).find((count) => count >= 4);
             return fourOfAKind ? dice.filter((die) => die !== null).reduce((acc, num) => acc + num, 0) : 0;
         },
     },
@@ -87,8 +87,8 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
         description: 'Three of a kind and a pair',
         scoreFunc: (dice) => {
             const counts = countNumbers(dice);
-            const threeOfAKind = Array.from(counts.values()).find((count) => count === 3);
-            const pair = Array.from(counts.values()).find((count) => count === 2);
+            const threeOfAKind = Object.values(counts).find((count) => count === 3);
+            const pair = Object.values(counts).find((count) => count === 2);
             return threeOfAKind && pair ? 25 : 0;
         },
     },
@@ -96,21 +96,33 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
         name: 'Small Straight',
         description: 'Four sequential dice',
         scoreFunc: (dice) => {
-            return 0;
+            const counts = countNumbers(dice);
+
+            const isStraight = range(1, 3)
+                .map((i) => range(i, i + 3))
+                .some((range) => range.every((num) => counts[num as keyof NumberCounts] >= 1));
+
+            return isStraight ? 30 : 0;
         },
     },
     {
         name: 'Large Straight',
         description: 'Five sequential dice',
         scoreFunc: (dice) => {
-            return 0;
+            const counts = countNumbers(dice);
+
+            const isStraight = range(1, 2)
+                .map((i) => range(i, i + 4))
+                .some((range) => range.every((num) => counts[num as keyof NumberCounts] >= 1));
+
+            return isStraight ? 40 : 0;
         },
     },
     {
         name: 'Yahtzee',
         description: 'All dice the same',
         scoreFunc: (dice) => {
-            const allSame = Array.from(countNumbers(dice).values()).find((count) => count === 5);
+            const allSame = Object.values(countNumbers(dice)).find((count) => count === 5);
             return allSame ? 50 : 0;
         },
     },
