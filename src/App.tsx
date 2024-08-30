@@ -1,3 +1,4 @@
+import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
 import { useState } from 'react';
 import { cn, countNumbers, NumberCounts, range } from './util';
 
@@ -14,13 +15,19 @@ type ScoreCardEntryProps = {
     description: string;
     scoreFunc: (dice: number[]) => number;
     dice: number[];
+    className?: string;
 };
 
-function ScoreCardEntry({ name, description, scoreFunc, dice }: ScoreCardEntryProps) {
+function ScoreCardEntry({ name, description, scoreFunc, dice, className }: ScoreCardEntryProps) {
     const score = scoreFunc(dice);
 
     return (
-        <div className="flex flex-row items-center justify-between rounded-md border-2 border-zinc-600 p-2">
+        <div
+            className={cn(
+                'flex flex-row items-center justify-between rounded-md border-2 border-zinc-600 p-2',
+                className,
+            )}
+        >
             <div>
                 <div className={cn('text-2xl font-bold', score === 0 && 'text-zinc-500')}>{name}</div>
                 <div className="italic text-zinc-400">{description}</div>
@@ -125,6 +132,7 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
             const allSame = Object.values(countNumbers(dice)).find((count) => count === 5);
             return allSame ? 50 : 0;
         },
+        className: 'col-span-2',
     },
 ];
 
@@ -135,6 +143,10 @@ function App() {
         setDice(dice.map(() => Math.floor(Math.random() * 6) + 1));
     }
 
+    function sort() {
+        setDice(dice.slice().sort((a, b) => a - b));
+    }
+
     return (
         <div className="grid items-center justify-center gap-2 p-4 sm:grid-cols-1 md:grid-cols-2">
             <div className="space-y-4">
@@ -143,12 +155,20 @@ function App() {
                         <Die key={index} value={value} />
                     ))}
                 </div>
-                <button
-                    className="w-full rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4 transition-all duration-1000 hover:from-red-600 hover:to-red-900"
-                    onClick={roll}
-                >
-                    Roll
-                </button>
+                <div className="flex flex-row gap-2">
+                    <button
+                        className="flex flex-1 justify-center rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4 hover:from-red-600 hover:to-red-900"
+                        onClick={roll}
+                    >
+                        <DicesIcon className="mr-2" /> Roll
+                    </button>
+                    <button
+                        className="w-fu flex justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-4 hover:from-emerald-600 hover:to-emerald-900"
+                        onClick={sort}
+                    >
+                        <ArrowUpDownIcon />
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-2 gap-2">
