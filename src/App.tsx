@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { cn } from './util';
+import { cn, countNumbers } from './util';
 
-function Die({ value }: { value: number | null }) {
+function Die({ value }: { value: number }) {
     return (
         <div className="flex h-16 w-16 items-center justify-center rounded-md border-2 border-zinc-50 text-2xl font-bold">
             {value}
@@ -12,8 +12,8 @@ function Die({ value }: { value: number | null }) {
 type ScoreCardEntryProps = {
     name: string;
     description: string;
-    scoreFunc: (dice: (number | null)[]) => number;
-    dice: (number | null)[];
+    scoreFunc: (dice: number[]) => number;
+    dice: number[];
 };
 
 function ScoreCardEntry({ name, description, scoreFunc, dice }: ScoreCardEntryProps) {
@@ -61,10 +61,63 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
         description: 'Any number of "6"s',
         scoreFunc: (dice) => dice.filter((die) => die === 6).reduce((acc, num) => acc + num, 0),
     },
+    {
+        name: 'Chance',
+        description: 'Sum of all dice',
+        scoreFunc: (dice) => dice.reduce((acc, num) => acc + num, 0),
+    },
+    {
+        name: 'Three of a Kind',
+        description: 'At least three dice the same',
+        scoreFunc: (dice) => {
+            const threeOfAKind = Array.from(countNumbers(dice).values()).find((count) => count >= 3);
+            return threeOfAKind ? dice.filter((die) => die !== null).reduce((acc, num) => acc + num, 0) : 0;
+        },
+    },
+    {
+        name: 'Four of a Kind',
+        description: 'At least four dice the same',
+        scoreFunc: (dice) => {
+            const fourOfAKind = Array.from(countNumbers(dice).values()).find((count) => count >= 4);
+            return fourOfAKind ? dice.filter((die) => die !== null).reduce((acc, num) => acc + num, 0) : 0;
+        },
+    },
+    {
+        name: 'Full House',
+        description: 'Three of a kind and a pair',
+        scoreFunc: (dice) => {
+            const counts = countNumbers(dice);
+            const threeOfAKind = Array.from(counts.values()).find((count) => count === 3);
+            const pair = Array.from(counts.values()).find((count) => count === 2);
+            return threeOfAKind && pair ? 25 : 0;
+        },
+    },
+    {
+        name: 'Small Straight',
+        description: 'Four sequential dice',
+        scoreFunc: (dice) => {
+            return 0;
+        },
+    },
+    {
+        name: 'Large Straight',
+        description: 'Five sequential dice',
+        scoreFunc: (dice) => {
+            return 0;
+        },
+    },
+    {
+        name: 'Yahtzee',
+        description: 'All dice the same',
+        scoreFunc: (dice) => {
+            const allSame = Array.from(countNumbers(dice).values()).find((count) => count === 5);
+            return allSame ? 50 : 0;
+        },
+    },
 ];
 
 function App() {
-    const [dice, setDice] = useState<(number | null)[]>([null, null, null, null, null]);
+    const [dice, setDice] = useState<number[]>([0, 0, 0, 0, 0]);
 
     function roll() {
         setDice(dice.map(() => Math.floor(Math.random() * 6) + 1));
@@ -86,7 +139,7 @@ function App() {
                 </button>
             </div>
 
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
                 {scoreCardEntries.map((entry) => (
                     <ScoreCardEntry key={entry.name} {...entry} dice={dice} />
                 ))}
