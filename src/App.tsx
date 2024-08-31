@@ -1,5 +1,5 @@
 import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useStore } from './state';
 import { cn, countNumbers, NumberCounts, range } from './util';
 
 function Die({ value }: { value: number }) {
@@ -14,19 +14,33 @@ type ScoreCardEntryProps = {
     name: string;
     description: string;
     scoreFunc: (dice: number[]) => number;
-    dice: number[];
+    index: number;
     className?: string;
 };
 
-function ScoreCardEntry({ name, description, scoreFunc, dice, className }: ScoreCardEntryProps) {
-    const score = scoreFunc(dice);
+function ScoreCardEntry({ name, description, scoreFunc, className, index }: ScoreCardEntryProps) {
+    const { dice, scoreCardEntries, updateScoreCardEntry, rollDice } = useStore();
+    const scoredValue = scoreCardEntries[index];
+    const locked = scoredValue !== null;
+    const score = scoredValue || scoreFunc(dice);
+
+    function onClick() {
+        if (locked) {
+            return;
+        }
+
+        updateScoreCardEntry(index, score);
+        rollDice();
+    }
 
     return (
         <div
             className={cn(
                 'flex flex-row items-center justify-between rounded-md border-2 border-zinc-600 p-2',
                 className,
+                locked && 'bg-sky-800',
             )}
+            onClick={onClick}
         >
             <div>
                 <div className={cn('text-2xl font-bold', score === 0 && 'text-zinc-500')}>{name}</div>
@@ -37,7 +51,7 @@ function ScoreCardEntry({ name, description, scoreFunc, dice, className }: Score
     );
 }
 
-const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
+const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice' | 'index'>[] = [
     {
         name: 'Aces',
         description: 'Any number of "1"s',
@@ -137,15 +151,7 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice'>[] = [
 ];
 
 function App() {
-    const [dice, setDice] = useState<number[]>([0, 0, 0, 0, 0]);
-
-    function roll() {
-        setDice(dice.map(() => Math.floor(Math.random() * 6) + 1));
-    }
-
-    function sort() {
-        setDice(dice.slice().sort((a, b) => a - b));
-    }
+    const { dice, rollDice, sortDice } = useStore();
 
     return (
         <div className="grid items-center justify-center gap-2 p-4 sm:grid-cols-1 md:grid-cols-2">
@@ -158,13 +164,13 @@ function App() {
                 <div className="flex flex-row gap-2">
                     <button
                         className="flex flex-1 justify-center rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4 hover:from-red-600 hover:to-red-900"
-                        onClick={roll}
+                        onClick={rollDice}
                     >
                         <DicesIcon className="mr-2" /> Roll
                     </button>
                     <button
                         className="flex justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-4 hover:from-emerald-600 hover:to-emerald-900"
-                        onClick={sort}
+                        onClick={sortDice}
                     >
                         <ArrowUpDownIcon />
                     </button>
@@ -172,8 +178,8 @@ function App() {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-                {scoreCardEntries.map((entry) => (
-                    <ScoreCardEntry key={entry.name} {...entry} dice={dice} />
+                {scoreCardEntries.map((entry, index) => (
+                    <ScoreCardEntry key={entry.name} index={index} {...entry} />
                 ))}
             </div>
         </div>
