@@ -2,9 +2,18 @@ import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
 import { useStore } from './state';
 import { cn, countNumbers, NumberCounts, range } from './util';
 
-function Die({ value }: { value: number }) {
+function Die({ value, index }: { value: number; index: number }) {
+    const { toggleDice, selectedDice } = useStore();
+    const isSelected = selectedDice.includes(index);
+
     return (
-        <div className="flex h-16 w-16 items-center justify-center rounded-md border-2 border-zinc-50 text-2xl font-bold">
+        <div
+            className={cn(
+                'flex h-16 w-16 items-center justify-center rounded-md border-2 border-zinc-50 text-2xl font-bold',
+                isSelected && 'bg-sky-800',
+            )}
+            onClick={() => toggleDice(index)}
+        >
             {value}
         </div>
     );
@@ -19,10 +28,10 @@ type ScoreCardEntryProps = {
 };
 
 function ScoreCardEntry({ name, description, scoreFunc, className, index }: ScoreCardEntryProps) {
-    const { dice, scoreCardEntries, updateScoreCardEntry, rollDice } = useStore();
+    const { dice, scoreCardEntries, updateScoreCardEntry, rollDice, unselectDice } = useStore();
     const scoredValue = scoreCardEntries[index];
     const locked = scoredValue !== null;
-    const score = scoredValue || scoreFunc(dice);
+    const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
 
     function onClick() {
         if (locked) {
@@ -30,6 +39,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
         }
 
         updateScoreCardEntry(index, score);
+        unselectDice();
         rollDice();
     }
 
@@ -158,7 +168,7 @@ function App() {
             <div className="space-y-4">
                 <div className="flex w-full flex-row justify-between gap-2">
                     {dice.map((value, index) => (
-                        <Die key={index} value={value} />
+                        <Die key={index} value={value} index={index} />
                     ))}
                 </div>
                 <div className="flex flex-row gap-2">
