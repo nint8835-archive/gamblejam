@@ -9,8 +9,8 @@ function Die({ value, index }: { value: number; index: number }) {
     return (
         <div
             className={cn(
-                'flex h-16 w-16 items-center justify-center rounded-md border-2 border-zinc-50 text-2xl font-bold',
-                isSelected && 'bg-sky-800',
+                'flex h-16 w-16 cursor-pointer items-center justify-center rounded-md border-2 border-zinc-50 text-2xl font-bold transition-all hover:border-4 hover:bg-sky-950',
+                isSelected && 'bg-sky-800 hover:bg-sky-600',
             )}
             onClick={() => toggleDice(index)}
         >
@@ -32,6 +32,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
     const scoredValue = scoreCardEntries[index];
     const locked = scoredValue !== null;
     const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
+    const nonScoring = score === 0 && !locked;
 
     function onClick() {
         if (locked) {
@@ -46,17 +47,18 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
     return (
         <div
             className={cn(
-                'flex flex-row items-center justify-between rounded-md border-2 border-zinc-600 p-2',
+                'flex flex-row items-center justify-between rounded-md border-2 border-zinc-600 p-2 transition-all',
                 className,
                 locked && 'bg-sky-800',
+                !locked && 'cursor-pointer hover:bg-sky-950',
             )}
             onClick={onClick}
         >
             <div>
-                <div className={cn('text-2xl font-bold', score === 0 && 'text-zinc-500')}>{name}</div>
+                <div className={cn('text-2xl font-bold transition-colors', nonScoring && 'text-zinc-500')}>{name}</div>
                 <div className="italic text-zinc-400">{description}</div>
             </div>
-            <div className={cn('text-xl font-medium', score === 0 && 'text-zinc-500')}>{score}</div>
+            <div className={cn('text-xl font-medium transition-colors', nonScoring && 'text-zinc-500')}>{score}</div>
         </div>
     );
 }
