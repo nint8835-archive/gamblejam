@@ -161,7 +161,7 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice' | 'index'>[] = [
 ];
 
 function App() {
-    const { dice, rollDice, sortDice } = useStore();
+    const { dice, rollDice, sortDice, totalScore } = useStore();
 
     return (
         <div className="grid items-center justify-center gap-2 p-4 sm:grid-cols-1 md:grid-cols-2">
@@ -191,6 +191,10 @@ function App() {
                 {scoreCardEntries.map((entry, index) => (
                     <ScoreCardEntry key={entry.name} index={index} {...entry} />
                 ))}
+                <div className="col-span-2 flex flex-row items-center justify-between gap-2">
+                    <div className="text-2xl font-black">Total score</div>
+                    <div className="text-2xl font-semibold">{totalScore}</div>
+                </div>
             </div>
         </div>
     );

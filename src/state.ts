@@ -7,6 +7,7 @@ type State = {
     selectedDice: number[];
 
     scoreCardEntries: (number | null)[];
+    totalScore: number;
 };
 
 type Actions = {
@@ -25,6 +26,7 @@ export const useStore = create<State & Actions>()(
             selectedDice: [],
 
             scoreCardEntries: Array(13).fill(null),
+            totalScore: 0,
 
             rollDice: () => {
                 set(
@@ -73,6 +75,9 @@ export const useStore = create<State & Actions>()(
                 set(
                     (state) => {
                         state.scoreCardEntries[index] = score;
+                        state.totalScore = state.scoreCardEntries
+                            .filter((score) => score !== null)
+                            .reduce((acc, score) => acc + score, 0);
                     },
                     undefined,
                     'updateScoreCardEntry',
