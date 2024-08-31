@@ -45,6 +45,7 @@ export const useStore = create<State & Actions>()(
                 set(
                     (state) => {
                         state.dice = state.dice.sort();
+                        state.selectedDice = [];
                     },
                     undefined,
                     'sortDice',
