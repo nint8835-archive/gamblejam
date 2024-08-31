@@ -28,7 +28,7 @@ type ScoreCardEntryProps = {
 };
 
 function ScoreCardEntry({ name, description, scoreFunc, className, index }: ScoreCardEntryProps) {
-    const { dice, scoreCardEntries, updateScoreCardEntry, rollDice, unselectDice } = useStore();
+    const { dice, scoreCardEntries, updateScoreCardEntry, rollDice, unselectDice, resetRerolls } = useStore();
     const scoredValue = scoreCardEntries[index];
     const locked = scoredValue !== null;
     const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
@@ -41,6 +41,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
 
         updateScoreCardEntry(index, score);
         unselectDice();
+        resetRerolls();
         rollDice();
     }
 
@@ -163,7 +164,13 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice' | 'index'>[] = [
 ];
 
 function App() {
-    const { dice, rollDice, sortDice, totalScore } = useStore();
+    const { dice, rollDice, sortDice, totalScore, rerolls } = useStore();
+
+    function roll() {
+        if (rerolls > 0) {
+            rollDice();
+        }
+    }
 
     return (
         <div className="grid items-center justify-center gap-2 p-4 sm:grid-cols-1 md:grid-cols-2">
@@ -175,13 +182,20 @@ function App() {
                 </div>
                 <div className="flex flex-row gap-2">
                     <button
-                        className="flex flex-1 justify-center rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4 hover:from-red-600 hover:to-red-900"
-                        onClick={rollDice}
+                        className={cn(
+                            'flex h-full flex-1 flex-col items-center justify-center rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4',
+                            rerolls > 0 && 'hover:from-red-600 hover:to-red-900',
+                            rerolls === 0 && 'cursor-not-allowed from-red-800 to-red-950',
+                        )}
+                        onClick={roll}
                     >
-                        <DicesIcon className="mr-2" /> Roll
+                        <div className="flex flex-row">
+                            <DicesIcon className="mr-2" /> Roll
+                        </div>
+                        <div className="italic text-red-300">({rerolls} rerolls)</div>
                     </button>
                     <button
-                        className="flex justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-4 hover:from-emerald-600 hover:to-emerald-900"
+                        className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-7 hover:from-emerald-600 hover:to-emerald-900"
                         onClick={sortDice}
                     >
                         <ArrowUpDownIcon />

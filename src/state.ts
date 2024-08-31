@@ -5,6 +5,7 @@ import { immer } from 'zustand/middleware/immer';
 type State = {
     dice: number[];
     selectedDice: number[];
+    rerolls: number;
 
     scoreCardEntries: (number | null)[];
     totalScore: number;
@@ -15,6 +16,7 @@ type Actions = {
     sortDice: () => void;
     toggleDice: (index: number) => void;
     unselectDice: () => void;
+    resetRerolls: () => void;
 
     updateScoreCardEntry: (index: number, score: number) => void;
 };
@@ -24,6 +26,7 @@ export const useStore = create<State & Actions>()(
         immer((set) => ({
             dice: [0, 0, 0, 0, 0],
             selectedDice: [],
+            rerolls: 4,
 
             scoreCardEntries: Array(13).fill(null),
             totalScore: 0,
@@ -36,6 +39,7 @@ export const useStore = create<State & Actions>()(
                                 ? Math.floor(Math.random() * 6) + 1
                                 : die,
                         );
+                        state.rerolls--;
                     },
                     undefined,
                     'rollDice',
@@ -69,6 +73,15 @@ export const useStore = create<State & Actions>()(
                     },
                     undefined,
                     'unselectDice',
+                );
+            },
+            resetRerolls: () => {
+                set(
+                    (state) => {
+                        state.rerolls = 4;
+                    },
+                    undefined,
+                    'resetReRolls',
                 );
             },
 
