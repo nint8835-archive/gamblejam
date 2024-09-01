@@ -9,8 +9,9 @@ import {
 } from '@floating-ui/react';
 import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { ScoreCardEntries, type ScoreCardEntry as ScoreCardEntryType } from './definitions/scorecard';
 import { useStore } from './state';
-import { cn, countNumbers, NumberCounts, range } from './util';
+import { cn } from './util';
 
 function Die({ value, index }: { value: number; index: number }) {
     const { toggleDice, selectedDice } = useStore();
@@ -29,17 +30,14 @@ function Die({ value, index }: { value: number; index: number }) {
     );
 }
 
-type ScoreCardEntryProps = {
-    name: string;
-    description: string;
-    scoreFunc: (dice: number[]) => number;
+type ScoreCardEntryProps = ScoreCardEntryType & {
     index: number;
     className?: string;
 };
 
 function ScoreCardEntry({ name, description, scoreFunc, className, index }: ScoreCardEntryProps) {
-    const { dice, scoreCardEntries, updateScoreCardEntry, rollDice, unselectDice, resetRerolls } = useStore();
-    const scoredValue = scoreCardEntries[index];
+    const { dice, rollDice, unselectDice, resetRerolls, scoreCardValues, updateScoreCardValue } = useStore();
+    const scoredValue = scoreCardValues[index].value;
     const locked = scoredValue !== null;
     const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
     const nonScoring = score === 0 && !locked;
@@ -49,7 +47,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
             return;
         }
 
-        updateScoreCardEntry(index, score);
+        updateScoreCardValue(index, score);
         unselectDice();
         resetRerolls();
         rollDice();
@@ -74,107 +72,8 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
     );
 }
 
-const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice' | 'index'>[] = [
-    {
-        name: 'Aces',
-        description: 'Any number of "1"s',
-        scoreFunc: (dice) => countNumbers(dice)[1],
-    },
-    {
-        name: 'Twos',
-        description: 'Any number of "2"s',
-        scoreFunc: (dice) => countNumbers(dice)[2] * 2,
-    },
-    {
-        name: 'Threes',
-        description: 'Any number of "3"s',
-        scoreFunc: (dice) => countNumbers(dice)[3] * 3,
-    },
-    {
-        name: 'Fours',
-        description: 'Any number of "4"s',
-        scoreFunc: (dice) => countNumbers(dice)[4] * 4,
-    },
-    {
-        name: 'Fives',
-        description: 'Any number of "5"s',
-        scoreFunc: (dice) => countNumbers(dice)[5] * 5,
-    },
-    {
-        name: 'Sixes',
-        description: 'Any number of "6"s',
-        scoreFunc: (dice) => countNumbers(dice)[6] * 6,
-    },
-    {
-        name: 'Chance',
-        description: 'Sum of all dice',
-        scoreFunc: (dice) => dice.reduce((acc, num) => acc + num, 0),
-    },
-    {
-        name: 'Three of a Kind',
-        description: 'At least three dice the same',
-        scoreFunc: (dice) => {
-            const threeOfAKind = Object.values(countNumbers(dice)).find((count) => count >= 3);
-            return threeOfAKind ? dice.filter((die) => die !== null).reduce((acc, num) => acc + num, 0) : 0;
-        },
-    },
-    {
-        name: 'Four of a Kind',
-        description: 'At least four dice the same',
-        scoreFunc: (dice) => {
-            const fourOfAKind = Object.values(countNumbers(dice)).find((count) => count >= 4);
-            return fourOfAKind ? dice.filter((die) => die !== null).reduce((acc, num) => acc + num, 0) : 0;
-        },
-    },
-    {
-        name: 'Full House',
-        description: 'Three of a kind and a pair',
-        scoreFunc: (dice) => {
-            const counts = countNumbers(dice);
-            const threeOfAKind = Object.values(counts).find((count) => count === 3);
-            const pair = Object.values(counts).find((count) => count === 2);
-            return threeOfAKind && pair ? 25 : 0;
-        },
-    },
-    {
-        name: 'Small Straight',
-        description: 'Four sequential dice',
-        scoreFunc: (dice) => {
-            const counts = countNumbers(dice);
-
-            const isStraight = range(1, 3)
-                .map((i) => range(i, i + 3))
-                .some((range) => range.every((num) => counts[num as keyof NumberCounts] >= 1));
-
-            return isStraight ? 30 : 0;
-        },
-    },
-    {
-        name: 'Large Straight',
-        description: 'Five sequential dice',
-        scoreFunc: (dice) => {
-            const counts = countNumbers(dice);
-
-            const isStraight = range(1, 2)
-                .map((i) => range(i, i + 4))
-                .some((range) => range.every((num) => counts[num as keyof NumberCounts] >= 1));
-
-            return isStraight ? 40 : 0;
-        },
-    },
-    {
-        name: 'Yahtzee',
-        description: 'All dice the same',
-        scoreFunc: (dice) => {
-            const allSame = Object.values(countNumbers(dice)).find((count) => count === 5);
-            return allSame ? 50 : 0;
-        },
-        className: 'col-span-2',
-    },
-];
-
 function App() {
-    const { dice, rollDice, sortDice, totalScore, rerolls, selectedDice } = useStore();
+    const { dice, rollDice, sortDice, totalScore, rerolls, selectedDice, scoreCardValues } = useStore();
     const [isOpen, setIsOpen] = useState(false);
     const arrowRef = useRef(null);
     const { refs, floatingStyles, context } = useFloating({
@@ -226,7 +125,7 @@ function App() {
                             <div className="rounded-md bg-zinc-700 p-2 text-center">
                                 You have no dice selected, so all dice will be rolled.
                                 <br />
-                                Click a die to select the die to reroll.
+                                Click a die to select the dice to reroll.
                             </div>
                         </div>
                     )}
@@ -240,8 +139,8 @@ function App() {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-                {scoreCardEntries.map((entry, index) => (
-                    <ScoreCardEntry key={entry.name} index={index} {...entry} />
+                {scoreCardValues.map((entry, index) => (
+                    <ScoreCardEntry key={index} index={index} {...ScoreCardEntries[entry.entryId]} />
                 ))}
                 <div className="col-span-2 flex flex-row items-center justify-between gap-2">
                     <div className="text-2xl font-black">Total score</div>

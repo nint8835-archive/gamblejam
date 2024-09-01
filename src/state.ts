@@ -1,13 +1,19 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import { ScoreCardEntries, type ScoreCardEntryId } from './definitions/scorecard';
+
+type ScoreCardValue = {
+    entryId: ScoreCardEntryId;
+    value: number | null;
+};
 
 type State = {
     dice: number[];
     selectedDice: number[];
     rerolls: number;
 
-    scoreCardEntries: (number | null)[];
+    scoreCardValues: ScoreCardValue[];
     totalScore: number;
 };
 
@@ -18,7 +24,7 @@ type Actions = {
     unselectDice: () => void;
     resetRerolls: () => void;
 
-    updateScoreCardEntry: (index: number, score: number) => void;
+    updateScoreCardValue: (index: number, value: number) => void;
 };
 
 export const useStore = create<State & Actions>()(
@@ -28,7 +34,10 @@ export const useStore = create<State & Actions>()(
             selectedDice: [],
             rerolls: 4,
 
-            scoreCardEntries: Array(13).fill(null),
+            scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
+                entryId: entryId as ScoreCardEntryId,
+                value: null,
+            })),
             totalScore: 0,
 
             rollDice: () => {
@@ -85,16 +94,17 @@ export const useStore = create<State & Actions>()(
                 );
             },
 
-            updateScoreCardEntry: (index, score) => {
+            updateScoreCardValue: (index, value) => {
                 set(
                     (state) => {
-                        state.scoreCardEntries[index] = score;
-                        state.totalScore = state.scoreCardEntries
+                        state.scoreCardValues[index].value = value;
+                        state.totalScore = state.scoreCardValues
+                            .map(({ value }) => value)
                             .filter((score) => score !== null)
                             .reduce((acc, score) => acc + score, 0);
                     },
                     undefined,
-                    'updateScoreCardEntry',
+                    'updateScoreCardValue',
                 );
             },
         })),
