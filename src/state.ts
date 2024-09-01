@@ -3,6 +3,10 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { ScoreCardEntries, type ScoreCardEntryId } from './definitions/scorecard';
 
+export type MainMenuState = {
+    stage: 'MainMenu';
+};
+
 type ScoreCardValue = {
     entryId: ScoreCardEntryId;
     value: number | null;
@@ -22,17 +26,17 @@ export type ActiveGameState = {
     currentGame: Game;
 } & Actions;
 
-export type MenuState = {
-    stage: 'Menu';
-};
+type StagedStates = MainMenuState | ActiveGameState;
 
-type StagedStates = ActiveGameState | MenuState;
+export type Stage = StagedStates['stage'];
 
 type GlobalStateValues = {};
 
 type State = GlobalStateValues & StagedStates;
 
 type Actions = {
+    beginGame: () => void;
+
     rollDice: () => void;
     sortDice: () => void;
     toggleDice: (index: number) => void;
@@ -47,17 +51,29 @@ export type StagedState<T extends StagedStates> = T & GlobalStateValues & Action
 export const useStore = create<State & Actions>()(
     devtools(
         immer((set) => ({
-            stage: 'ActiveGame',
-            currentGame: {
-                dice: [0, 0, 0, 0, 0],
-                selectedDice: [],
-                rerolls: 4,
+            stage: 'MainMenu',
 
-                scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
-                    entryId: entryId as ScoreCardEntryId,
-                    value: null,
-                })),
-                totalScore: 0,
+            beginGame: () => {
+                set((state) => {
+                    if (state.stage !== 'MainMenu') {
+                        throw new Error('Cannot begin game when not in the main menu');
+                    }
+
+                    const newState = state as any as ActiveGameState;
+
+                    newState.stage = 'ActiveGame';
+                    newState.currentGame = {
+                        dice: [0, 0, 0, 0, 0],
+                        selectedDice: [],
+                        rerolls: 4,
+
+                        scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
+                            entryId: entryId as ScoreCardEntryId,
+                            value: null,
+                        })),
+                        totalScore: 0,
+                    };
+                });
             },
 
             rollDice: () => {
