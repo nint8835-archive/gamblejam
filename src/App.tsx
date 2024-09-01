@@ -10,11 +10,14 @@ import {
 import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { ScoreCardEntries, type ScoreCardEntry as ScoreCardEntryType } from './definitions/scorecard';
-import { useStore } from './state';
+import { ActiveGameState, StagedState, useStore } from './state';
 import { cn } from './util';
 
 function Die({ value, index }: { value: number; index: number }) {
-    const { toggleDice, selectedDice } = useStore();
+    const {
+        toggleDice,
+        currentGame: { selectedDice },
+    } = useStore() as StagedState<ActiveGameState>;
     const isSelected = selectedDice.includes(index);
 
     return (
@@ -36,7 +39,13 @@ type ScoreCardEntryProps = ScoreCardEntryType & {
 };
 
 function ScoreCardEntry({ name, description, scoreFunc, className, index }: ScoreCardEntryProps) {
-    const { dice, rollDice, unselectDice, resetRerolls, scoreCardValues, updateScoreCardValue } = useStore();
+    const {
+        currentGame: { dice, scoreCardValues },
+        rollDice,
+        unselectDice,
+        resetRerolls,
+        updateScoreCardValue,
+    } = useStore() as StagedState<ActiveGameState>;
     const scoredValue = scoreCardValues[index].value;
     const locked = scoredValue !== null;
     const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
@@ -73,7 +82,11 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
 }
 
 function App() {
-    const { dice, rollDice, sortDice, totalScore, rerolls, selectedDice, scoreCardValues } = useStore();
+    const {
+        currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues },
+        rollDice,
+        sortDice,
+    } = useStore() as StagedState<ActiveGameState>;
     const [isOpen, setIsOpen] = useState(false);
     const arrowRef = useRef(null);
     const { refs, floatingStyles, context } = useFloating({
