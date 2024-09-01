@@ -1,4 +1,14 @@
+import {
+    arrow,
+    FloatingArrow,
+    offset,
+    useFloating,
+    useHover,
+    useInteractions,
+    useTransitionStyles,
+} from '@floating-ui/react';
 import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
+import { useRef, useState } from 'react';
 import { useStore } from './state';
 import { cn, countNumbers, NumberCounts, range } from './util';
 
@@ -164,7 +174,17 @@ const scoreCardEntries: Omit<ScoreCardEntryProps, 'dice' | 'index'>[] = [
 ];
 
 function App() {
-    const { dice, rollDice, sortDice, totalScore, rerolls } = useStore();
+    const { dice, rollDice, sortDice, totalScore, rerolls, selectedDice } = useStore();
+    const [isOpen, setIsOpen] = useState(false);
+    const arrowRef = useRef(null);
+    const { refs, floatingStyles, context } = useFloating({
+        open: isOpen,
+        onOpenChange: setIsOpen,
+        middleware: [arrow({ element: arrowRef }), offset(7)],
+    });
+    const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
+    const hover = useHover(context);
+    const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
     function roll() {
         if (rerolls > 0) {
@@ -188,12 +208,28 @@ function App() {
                             rerolls === 0 && 'cursor-not-allowed from-red-800 to-red-950',
                         )}
                         onClick={roll}
+                        ref={refs.setReference}
+                        {...getReferenceProps()}
                     >
                         <div className="flex flex-row">
                             <DicesIcon className="mr-2" /> Roll
                         </div>
                         <div className="italic text-red-300">({rerolls} rerolls)</div>
                     </button>
+                    {isMounted && selectedDice.length === 0 && (
+                        <div
+                            ref={refs.setFloating}
+                            style={{ ...floatingStyles, ...transitionStyles }}
+                            {...getFloatingProps()}
+                        >
+                            <FloatingArrow ref={arrowRef} context={context} fill="#3f3f46" />
+                            <div className="rounded-md bg-zinc-700 p-2 text-center">
+                                You have no dice selected, so all dice will be rolled.
+                                <br />
+                                Click a die to select the die to reroll.
+                            </div>
+                        </div>
+                    )}
                     <button
                         className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-7 hover:from-emerald-600 hover:to-emerald-900"
                         onClick={sortDice}
