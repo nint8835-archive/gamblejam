@@ -24,7 +24,7 @@ type Game = {
 export type ActiveGameState = {
     stage: 'ActiveGame';
     currentGame: Game;
-} & Actions;
+};
 
 type StagedStates = MainMenuState | ActiveGameState;
 
