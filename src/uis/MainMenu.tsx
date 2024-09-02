@@ -1,11 +1,11 @@
-import { useStore } from '../state';
+import { useStore } from '../state/state';
 
 export function MainMenuUi() {
     const beginGame = useStore((state) => state.beginGame);
 
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-4">
-            <h1 className="bg-gradient-to-br from-red-500 to-purple-500 bg-clip-text text-6xl font-black text-transparent">
+            <h1 className="bg-gradient-to-br from-red-500 to-purple-500 bg-clip-text text-6xl font-black leading-normal text-transparent">
                 Gamblejam
             </h1>
             <button

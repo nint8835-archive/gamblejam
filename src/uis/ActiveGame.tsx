@@ -10,7 +10,8 @@ import {
 import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { ScoreCardEntries, ScoreCardEntry as ScoreCardEntryType } from '../definitions/scorecard';
-import { ActiveGameState, StagedState, useStore } from '../state';
+import { useStore } from '../state/state';
+import type { ActiveGameState, StagedState } from '../state/types';
 import { cn } from '../util';
 
 function Die({ value, index }: { value: number; index: number }) {

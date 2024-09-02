@@ -1,5 +1,6 @@
 import { FunctionComponent } from 'react';
-import { Stage, useStore } from './state';
+import { useStore } from './state/state';
+import type { Stage } from './state/types';
 import { ActiveGameUi } from './uis/ActiveGame';
 import { MainMenuUi } from './uis/MainMenu';
 

@@ -1,52 +1,8 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import { ScoreCardEntries, type ScoreCardEntryId } from './definitions/scorecard';
-
-export type MainMenuState = {
-    stage: 'MainMenu';
-};
-
-type ScoreCardValue = {
-    entryId: ScoreCardEntryId;
-    value: number | null;
-};
-
-type Game = {
-    dice: number[];
-    selectedDice: number[];
-    rerolls: number;
-
-    scoreCardValues: ScoreCardValue[];
-    totalScore: number;
-};
-
-export type ActiveGameState = {
-    stage: 'ActiveGame';
-    currentGame: Game;
-};
-
-type StagedStates = MainMenuState | ActiveGameState;
-
-export type Stage = StagedStates['stage'];
-
-type GlobalStateValues = {};
-
-type State = GlobalStateValues & StagedStates;
-
-type Actions = {
-    beginGame: () => void;
-
-    rollDice: () => void;
-    sortDice: () => void;
-    toggleDice: (index: number) => void;
-    unselectDice: () => void;
-    resetRerolls: () => void;
-
-    updateScoreCardValue: (index: number, value: number) => void;
-};
-
-export type StagedState<T extends StagedStates> = T & GlobalStateValues & Actions;
+import { ScoreCardEntries, type ScoreCardEntryId } from '../definitions/scorecard';
+import type { Actions, ActiveGameState, State } from './types';
 
 export const useStore = create<State & Actions>()(
     devtools(
@@ -54,26 +10,30 @@ export const useStore = create<State & Actions>()(
             stage: 'MainMenu',
 
             beginGame: () => {
-                set((state) => {
-                    if (state.stage !== 'MainMenu') {
-                        throw new Error('Cannot begin game when not in the main menu');
-                    }
+                set(
+                    (state) => {
+                        if (state.stage !== 'MainMenu') {
+                            throw new Error('Cannot begin game when not in the main menu');
+                        }
 
-                    const newState = state as any as ActiveGameState;
+                        const newState = state as any as ActiveGameState;
 
-                    newState.stage = 'ActiveGame';
-                    newState.currentGame = {
-                        dice: [0, 0, 0, 0, 0],
-                        selectedDice: [],
-                        rerolls: 4,
+                        newState.stage = 'ActiveGame';
+                        newState.currentGame = {
+                            dice: [0, 0, 0, 0, 0],
+                            selectedDice: [],
+                            rerolls: 4,
 
-                        scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
-                            entryId: entryId as ScoreCardEntryId,
-                            value: null,
-                        })),
-                        totalScore: 0,
-                    };
-                });
+                            scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
+                                entryId: entryId as ScoreCardEntryId,
+                                value: null,
+                            })),
+                            totalScore: 0,
+                        };
+                    },
+                    undefined,
+                    'beginGame',
+                );
             },
 
             rollDice: () => {
