@@ -101,7 +101,7 @@ export const UpdateScoreCardValueTransition: Transition<UpdateScoreCardValueTran
             .reduce((acc, score) => acc + score, 0);
 
         if (currentGame.totalScore >= currentGame.targetScore) {
-            state.stateMachine = { stage: 'GameWon' };
+            state.stateMachine = { stage: 'GameWon', moneyEarned: 0 };
             return;
         }
 
@@ -110,7 +110,11 @@ export const UpdateScoreCardValueTransition: Transition<UpdateScoreCardValueTran
             UnselectDiceTransition.invoke(state, { type: 'UnselectDice' });
             RollDiceTransition.invoke(state, { type: 'RollDice' });
         } else {
-            state.stateMachine = { stage: 'GameLost' };
+            state.stateMachine = {
+                stage: 'GameLost',
+                totalScore: currentGame.totalScore,
+                targetScore: currentGame.targetScore,
+            };
         }
     },
 };

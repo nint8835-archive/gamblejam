@@ -28,10 +28,13 @@ export type ActiveGameState = {
 
 export type GameLostState = {
     stage: 'GameLost';
+    totalScore: number;
+    targetScore: number;
 };
 
 export type GameWonState = {
     stage: 'GameWon';
+    moneyEarned: number;
 };
 
 export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState;
@@ -42,10 +45,12 @@ export type State = {
     stateMachine: StateMachine;
 
     scoreCardContents: ScoreCardEntryId[];
+    money: number;
 };
 
 export type Actions = {
     invoke: (invocation: TransitionInvocation) => void;
+    reset: () => void;
 };
 
 export type CompleteState = State & Actions;

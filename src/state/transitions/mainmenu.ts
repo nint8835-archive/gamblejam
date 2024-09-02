@@ -25,20 +25,8 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
     },
 };
 
-export type QuitGameTransitionInvocation = {
-    type: 'QuitGame';
-};
-
-export const QuitGameTransition: Transition<QuitGameTransitionInvocation> = {
-    permittedStates: ['ActiveGame', 'GameLost', 'GameWon'],
-    invoke: (state, _) => {
-        state.stateMachine = { stage: 'MainMenu' };
-    },
-};
-
-export type MainMenuTransitionInvocations = BeginGameTransitionInvocation | QuitGameTransitionInvocation;
+export type MainMenuTransitionInvocations = BeginGameTransitionInvocation;
 
 export const MainMenuTransitions = {
     BeginGame: BeginGameTransition,
-    QuitGame: QuitGameTransition,
 };
