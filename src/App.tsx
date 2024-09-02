@@ -10,7 +10,7 @@ const stageComponents: Record<Stage, FunctionComponent> = {
 };
 
 function App() {
-    const stage = useStore((state) => state.stage);
+    const stage = useStore((state) => state.stateMachine.stage);
     const UiComponent = stageComponents[stage];
 
     return <UiComponent />;

@@ -23,13 +23,15 @@ export type ActiveGameState = {
     currentGame: Game;
 };
 
-export type StagedStates = MainMenuState | ActiveGameState;
+export type StateMachine = MainMenuState | ActiveGameState;
 
-export type Stage = StagedStates['stage'];
+export type Stage = StateMachine['stage'];
 
 export type GlobalStateValues = {};
 
-export type State = GlobalStateValues & StagedStates;
+export type State = {
+    stateMachine: StateMachine;
+};
 
 export type Actions = {
     beginGame: () => void;
@@ -43,4 +45,4 @@ export type Actions = {
     updateScoreCardValue: (index: number, value: number) => void;
 };
 
-export type StagedState<T extends StagedStates> = T & GlobalStateValues & Actions;
+export type StagedState<T extends StateMachine> = State & Actions & { stateMachine: T };

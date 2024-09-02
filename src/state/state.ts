@@ -7,16 +7,18 @@ import type { Actions, ActiveGameState, State } from './types';
 export const useStore = create<State & Actions>()(
     devtools(
         immer((set) => ({
-            stage: 'MainMenu',
+            stateMachine: {
+                stage: 'MainMenu',
+            },
 
             beginGame: () => {
                 set(
                     (state) => {
-                        if (state.stage !== 'MainMenu') {
+                        if (state.stateMachine.stage !== 'MainMenu') {
                             throw new Error('Cannot begin game when not in the main menu');
                         }
 
-                        const newState = state as any as ActiveGameState;
+                        const newState = state.stateMachine as any as ActiveGameState;
 
                         newState.stage = 'ActiveGame';
                         newState.currentGame = {
@@ -39,17 +41,18 @@ export const useStore = create<State & Actions>()(
             rollDice: () => {
                 set(
                     (state) => {
-                        if (state.stage !== 'ActiveGame') {
+                        if (state.stateMachine.stage !== 'ActiveGame') {
                             throw new Error('Cannot roll dice when not in an active game');
                         }
 
-                        state.currentGame.dice = state.currentGame.dice.map((die, index) =>
-                            state.currentGame.selectedDice.includes(index) ||
-                            state.currentGame.selectedDice.length === 0
+                        const currentGame = state.stateMachine.currentGame;
+
+                        currentGame.dice = currentGame.dice.map((die, index) =>
+                            currentGame.selectedDice.includes(index) || currentGame.selectedDice.length === 0
                                 ? Math.floor(Math.random() * 6) + 1
                                 : die,
                         );
-                        state.currentGame.rerolls--;
+                        currentGame.rerolls--;
                     },
                     undefined,
                     'rollDice',
@@ -58,12 +61,12 @@ export const useStore = create<State & Actions>()(
             sortDice: () => {
                 set(
                     (state) => {
-                        if (state.stage !== 'ActiveGame') {
+                        if (state.stateMachine.stage !== 'ActiveGame') {
                             throw new Error('Cannot sort dice when not in an active game');
                         }
 
-                        state.currentGame.dice = state.currentGame.dice.sort();
-                        state.currentGame.selectedDice = [];
+                        state.stateMachine.currentGame.dice = state.stateMachine.currentGame.dice.sort();
+                        state.stateMachine.currentGame.selectedDice = [];
                     },
                     undefined,
                     'sortDice',
@@ -72,13 +75,14 @@ export const useStore = create<State & Actions>()(
             toggleDice: (index) => {
                 set(
                     (state) => {
-                        if (state.stage !== 'ActiveGame') {
+                        if (state.stateMachine.stage !== 'ActiveGame') {
                             throw new Error('Cannot toggle dice when not in an active game');
                         }
 
-                        state.currentGame.selectedDice = state.currentGame.selectedDice.includes(index)
-                            ? state.currentGame.selectedDice.filter((i) => i !== index)
-                            : state.currentGame.selectedDice.concat(index);
+                        state.stateMachine.currentGame.selectedDice =
+                            state.stateMachine.currentGame.selectedDice.includes(index)
+                                ? state.stateMachine.currentGame.selectedDice.filter((i) => i !== index)
+                                : state.stateMachine.currentGame.selectedDice.concat(index);
                     },
                     undefined,
                     'toggleDice',
@@ -87,11 +91,11 @@ export const useStore = create<State & Actions>()(
             unselectDice: () => {
                 set(
                     (state) => {
-                        if (state.stage !== 'ActiveGame') {
+                        if (state.stateMachine.stage !== 'ActiveGame') {
                             throw new Error('Cannot unselect dice when not in an active game');
                         }
 
-                        state.currentGame.selectedDice = [];
+                        state.stateMachine.currentGame.selectedDice = [];
                     },
                     undefined,
                     'unselectDice',
@@ -100,11 +104,11 @@ export const useStore = create<State & Actions>()(
             resetRerolls: () => {
                 set(
                     (state) => {
-                        if (state.stage !== 'ActiveGame') {
+                        if (state.stateMachine.stage !== 'ActiveGame') {
                             throw new Error('Cannot reset rerolls when not in an active game');
                         }
 
-                        state.currentGame.rerolls = 4;
+                        state.stateMachine.currentGame.rerolls = 4;
                     },
                     undefined,
                     'resetReRolls',
@@ -114,12 +118,12 @@ export const useStore = create<State & Actions>()(
             updateScoreCardValue: (index, value) => {
                 set(
                     (state) => {
-                        if (state.stage !== 'ActiveGame') {
+                        if (state.stateMachine.stage !== 'ActiveGame') {
                             throw new Error('Cannot update score card value when not in an active game');
                         }
 
-                        state.currentGame.scoreCardValues[index].value = value;
-                        state.currentGame.totalScore = state.currentGame.scoreCardValues
+                        state.stateMachine.currentGame.scoreCardValues[index].value = value;
+                        state.stateMachine.currentGame.totalScore = state.stateMachine.currentGame.scoreCardValues
                             .map(({ value }) => value)
                             .filter((score) => score !== null)
                             .reduce((acc, score) => acc + score, 0);

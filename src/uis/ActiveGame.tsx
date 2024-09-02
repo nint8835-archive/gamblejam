@@ -17,7 +17,9 @@ import { cn } from '../util';
 function Die({ value, index }: { value: number; index: number }) {
     const {
         toggleDice,
-        currentGame: { selectedDice },
+        stateMachine: {
+            currentGame: { selectedDice },
+        },
     } = useStore() as StagedState<ActiveGameState>;
     const isSelected = selectedDice.includes(index);
 
@@ -41,7 +43,9 @@ type ScoreCardEntryProps = ScoreCardEntryType & {
 
 function ScoreCardEntry({ name, description, scoreFunc, className, index }: ScoreCardEntryProps) {
     const {
-        currentGame: { dice, scoreCardValues },
+        stateMachine: {
+            currentGame: { dice, scoreCardValues },
+        },
         rollDice,
         unselectDice,
         resetRerolls,
@@ -84,7 +88,9 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
 
 export function ActiveGameUi() {
     const {
-        currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues },
+        stateMachine: {
+            currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues },
+        },
         rollDice,
         sortDice,
     } = useStore() as StagedState<ActiveGameState>;
