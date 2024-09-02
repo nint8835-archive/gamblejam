@@ -101,7 +101,16 @@ export const UpdateScoreCardValueTransition: Transition<UpdateScoreCardValueTran
             .reduce((acc, score) => acc + score, 0);
 
         if (currentGame.totalScore >= currentGame.targetScore) {
-            state.stateMachine = { stage: 'GameWon', moneyEarned: 0 };
+            const unusedCardEntries = currentGame.scoreCardValues.filter(({ value }) => value === null).length;
+
+            const moneyEarned = unusedCardEntries;
+
+            state.stateMachine = {
+                stage: 'GameWon',
+                unusedCardEarnings: moneyEarned,
+                totalEarnings: moneyEarned,
+            };
+            state.money += moneyEarned;
             return;
         }
 

@@ -34,7 +34,8 @@ export type GameLostState = {
 
 export type GameWonState = {
     stage: 'GameWon';
-    moneyEarned: number;
+    unusedCardEarnings: number;
+    totalEarnings: number;
 };
 
 export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState;
