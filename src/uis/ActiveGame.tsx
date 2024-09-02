@@ -75,7 +75,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
 export function ActiveGameUi() {
     const {
         stateMachine: {
-            currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues },
+            currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues, targetScore },
         },
         invoke,
     } = useStore() as StagedState<ActiveGameState>;
@@ -144,6 +144,10 @@ export function ActiveGameUi() {
                 <div className="col-span-2 flex flex-row items-center justify-between gap-2">
                     <div className="text-2xl font-black">Total score</div>
                     <div className="text-2xl font-semibold">{totalScore}</div>
+                </div>
+                <div className="col-span-2 flex flex-row items-center justify-between gap-2">
+                    <div className="text-2xl font-black">Target score</div>
+                    <div className="text-2xl font-semibold">{targetScore}</div>
                 </div>
             </div>
         </div>

@@ -18,6 +18,7 @@ export type Game = {
 
     scoreCardValues: ScoreCardValue[];
     totalScore: number;
+    targetScore: number;
 };
 
 export type ActiveGameState = {
@@ -25,7 +26,15 @@ export type ActiveGameState = {
     currentGame: Game;
 };
 
-export type StateMachine = MainMenuState | ActiveGameState;
+export type GameLostState = {
+    stage: 'GameLost';
+};
+
+export type GameWonState = {
+    stage: 'GameWon';
+};
+
+export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState;
 
 export type Stage = StateMachine['stage'];
 

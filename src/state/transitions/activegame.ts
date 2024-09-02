@@ -100,9 +100,18 @@ export const UpdateScoreCardValueTransition: Transition<UpdateScoreCardValueTran
             .filter((score) => score !== null)
             .reduce((acc, score) => acc + score, 0);
 
-        ResetRerollsTransition.invoke(state, { type: 'ResetRerolls' });
-        UnselectDiceTransition.invoke(state, { type: 'UnselectDice' });
-        RollDiceTransition.invoke(state, { type: 'RollDice' });
+        if (currentGame.totalScore >= currentGame.targetScore) {
+            state.stateMachine = { stage: 'GameWon' };
+            return;
+        }
+
+        if (currentGame.scoreCardValues.some(({ value }) => value === null)) {
+            ResetRerollsTransition.invoke(state, { type: 'ResetRerolls' });
+            UnselectDiceTransition.invoke(state, { type: 'UnselectDice' });
+            RollDiceTransition.invoke(state, { type: 'RollDice' });
+        } else {
+            state.stateMachine = { stage: 'GameLost' };
+        }
     },
 };
 

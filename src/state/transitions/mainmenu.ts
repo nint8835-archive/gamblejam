@@ -17,6 +17,7 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
 
                 scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
                 totalScore: 0,
+                targetScore: 20,
             },
         };
 
