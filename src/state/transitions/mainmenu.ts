@@ -17,7 +17,7 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
 
                 scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
                 totalScore: 0,
-                targetScore: 20,
+                targetScore: 100,
             },
         };
 
@@ -25,8 +25,20 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
     },
 };
 
-export type MainMenuTransitionInvocations = BeginGameTransitionInvocation;
+export type QuitGameTransitionInvocation = {
+    type: 'QuitGame';
+};
+
+export const QuitGameTransition: Transition<QuitGameTransitionInvocation> = {
+    permittedStates: ['ActiveGame', 'GameLost', 'GameWon'],
+    invoke: (state, _) => {
+        state.stateMachine = { stage: 'MainMenu' };
+    },
+};
+
+export type MainMenuTransitionInvocations = BeginGameTransitionInvocation | QuitGameTransitionInvocation;
 
 export const MainMenuTransitions = {
     BeginGame: BeginGameTransition,
+    QuitGame: QuitGameTransition,
 };
