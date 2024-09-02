@@ -10,6 +10,10 @@ export const RollDiceTransition: Transition<RollDiceTransitionInvocation> = {
     invoke: (state, _) => {
         const currentGame = (state.stateMachine as WritableDraft<ActiveGameState>).currentGame;
 
+        if (currentGame.rerolls <= 0) {
+            throw new Error('Cannot roll dice with no rerolls remaining');
+        }
+
         currentGame.dice = currentGame.dice.map((die, index) =>
             currentGame.selectedDice.includes(index) || currentGame.selectedDice.length === 0
                 ? Math.floor(Math.random() * 6) + 1
@@ -86,11 +90,19 @@ export const UpdateScoreCardValueTransition: Transition<UpdateScoreCardValueTran
     invoke: (state, { index, value }) => {
         const currentGame = (state.stateMachine as WritableDraft<ActiveGameState>).currentGame;
 
+        if (currentGame.scoreCardValues[index].value !== null) {
+            throw new Error(`Cannot update score card value for index ${index} as it is already set`);
+        }
+
         currentGame.scoreCardValues[index].value = value;
         currentGame.totalScore = currentGame.scoreCardValues
             .map(({ value }) => value)
             .filter((score) => score !== null)
             .reduce((acc, score) => acc + score, 0);
+
+        ResetRerollsTransition.invoke(state, { type: 'ResetRerolls' });
+        UnselectDiceTransition.invoke(state, { type: 'UnselectDice' });
+        RollDiceTransition.invoke(state, { type: 'RollDice' });
     },
 };
 

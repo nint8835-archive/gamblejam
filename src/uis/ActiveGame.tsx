@@ -53,17 +53,6 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
     const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
     const nonScoring = score === 0 && !locked;
 
-    function onClick() {
-        if (locked) {
-            return;
-        }
-
-        invoke({ type: 'UpdateScoreCardValue', index, value: score });
-        invoke({ type: 'UnselectDice' });
-        invoke({ type: 'ResetRerolls' });
-        invoke({ type: 'RollDice' });
-    }
-
     return (
         <div
             className={cn(
@@ -72,7 +61,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
                 locked && 'bg-sky-800',
                 !locked && 'cursor-pointer hover:bg-sky-950',
             )}
-            onClick={onClick}
+            onClick={() => invoke({ type: 'UpdateScoreCardValue', index, value: score })}
         >
             <div>
                 <div className={cn('text-2xl font-bold transition-colors', nonScoring && 'text-zinc-500')}>{name}</div>
@@ -101,12 +90,6 @@ export function ActiveGameUi() {
     const hover = useHover(context);
     const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
-    function roll() {
-        if (rerolls > 0) {
-            invoke({ type: 'RollDice' });
-        }
-    }
-
     return (
         <div className="grid items-center justify-center gap-2 p-4 sm:grid-cols-1 md:grid-cols-2">
             <div className="space-y-4">
@@ -122,7 +105,7 @@ export function ActiveGameUi() {
                             rerolls > 0 && 'hover:from-red-600 hover:to-red-900',
                             rerolls === 0 && 'cursor-not-allowed from-red-800 to-red-950',
                         )}
-                        onClick={roll}
+                        onClick={() => invoke({ type: 'RollDice' })}
                         ref={refs.setReference}
                         {...getReferenceProps()}
                     >

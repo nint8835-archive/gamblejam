@@ -1,5 +1,6 @@
 import { ScoreCardEntries, type ScoreCardEntryId } from '../../definitions/scorecard';
 import type { Transition } from '../types';
+import { RollDiceTransition } from './activegame';
 
 export type BeginGameTransitionInvocation = {
     type: 'BeginGame';
@@ -22,6 +23,8 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
                 totalScore: 0,
             },
         };
+
+        RollDiceTransition.invoke(state, { type: 'RollDice' });
     },
 };
 
