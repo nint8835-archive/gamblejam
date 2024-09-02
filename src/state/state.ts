@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { ScoreCardEntries, type ScoreCardEntryId } from '../definitions/scorecard';
-import type { Actions, ActiveGameState, State } from './types';
+import type { Actions, State } from './types';
 
 export const useStore = create<State & Actions>()(
     devtools(
@@ -18,19 +18,19 @@ export const useStore = create<State & Actions>()(
                             throw new Error('Cannot begin game when not in the main menu');
                         }
 
-                        const newState = state.stateMachine as any as ActiveGameState;
+                        state.stateMachine = {
+                            stage: 'ActiveGame',
+                            currentGame: {
+                                dice: [0, 0, 0, 0, 0],
+                                selectedDice: [],
+                                rerolls: 4,
 
-                        newState.stage = 'ActiveGame';
-                        newState.currentGame = {
-                            dice: [0, 0, 0, 0, 0],
-                            selectedDice: [],
-                            rerolls: 4,
-
-                            scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
-                                entryId: entryId as ScoreCardEntryId,
-                                value: null,
-                            })),
-                            totalScore: 0,
+                                scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
+                                    entryId: entryId as ScoreCardEntryId,
+                                    value: null,
+                                })),
+                                totalScore: 0,
+                            },
                         };
                     },
                     undefined,
