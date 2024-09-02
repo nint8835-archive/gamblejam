@@ -5,11 +5,11 @@ import { type MainMenuTransitionInvocations, MainMenuTransitions } from './mainm
 
 export type TransitionInvocation = MainMenuTransitionInvocations | ActiveGameTransitionInvocations;
 
-type OfUnion<T extends { type: string }> = {
+type TransitionHandlers<T extends { type: string }> = {
     [P in T['type']]: Transition<Extract<T, { type: P }>>;
 };
 
-const transitions: OfUnion<TransitionInvocation> = {
+const transitions: TransitionHandlers<TransitionInvocation> = {
     ...MainMenuTransitions,
     ...ActiveGameTransitions,
 };
