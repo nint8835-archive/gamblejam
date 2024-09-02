@@ -1,7 +1,7 @@
 import { useStore } from '../state/state';
 
 export function MainMenuUi() {
-    const beginGame = useStore((state) => state.beginGame);
+    const invoke = useStore((state) => state.invoke);
 
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-4">
@@ -10,7 +10,9 @@ export function MainMenuUi() {
             </h1>
             <button
                 className="rounded-md bg-gradient-to-b from-green-500 to-green-700 px-8 py-2 text-2xl font-semibold hover:from-green-700 hover:to-green-900"
-                onClick={beginGame}
+                onClick={() => {
+                    invoke({ type: 'BeginGame' });
+                }}
             >
                 Start
             </button>

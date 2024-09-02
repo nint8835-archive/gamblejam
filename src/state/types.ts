@@ -1,4 +1,6 @@
+import { type WritableDraft } from 'immer';
 import { type ScoreCardEntryId } from '../definitions/scorecard';
+import { type TransitionInvocation } from './transitions/all';
 
 export type MainMenuState = {
     stage: 'MainMenu';
@@ -27,22 +29,19 @@ export type StateMachine = MainMenuState | ActiveGameState;
 
 export type Stage = StateMachine['stage'];
 
-export type GlobalStateValues = {};
-
 export type State = {
     stateMachine: StateMachine;
 };
 
 export type Actions = {
-    beginGame: () => void;
-
-    rollDice: () => void;
-    sortDice: () => void;
-    toggleDice: (index: number) => void;
-    unselectDice: () => void;
-    resetRerolls: () => void;
-
-    updateScoreCardValue: (index: number, value: number) => void;
+    invoke: (invocation: TransitionInvocation) => void;
 };
 
-export type StagedState<T extends StateMachine> = State & Actions & { stateMachine: T };
+export type CompleteState = State & Actions;
+
+export type StagedState<T extends StateMachine> = CompleteState & { stateMachine: T };
+
+export type Transition<T> = {
+    permittedStates: Stage[];
+    invoke: (state: WritableDraft<CompleteState>, invocation: T) => void;
+};

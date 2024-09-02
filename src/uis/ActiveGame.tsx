@@ -16,10 +16,10 @@ import { cn } from '../util';
 
 function Die({ value, index }: { value: number; index: number }) {
     const {
-        toggleDice,
         stateMachine: {
             currentGame: { selectedDice },
         },
+        invoke,
     } = useStore() as StagedState<ActiveGameState>;
     const isSelected = selectedDice.includes(index);
 
@@ -29,7 +29,7 @@ function Die({ value, index }: { value: number; index: number }) {
                 'flex h-16 w-16 cursor-pointer items-center justify-center rounded-md border-2 border-zinc-50 text-2xl font-bold transition-all hover:border-4 hover:bg-sky-950',
                 isSelected && 'bg-sky-800 hover:bg-sky-600',
             )}
-            onClick={() => toggleDice(index)}
+            onClick={() => invoke({ type: 'ToggleDice', index })}
         >
             {value}
         </div>
@@ -46,10 +46,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
         stateMachine: {
             currentGame: { dice, scoreCardValues },
         },
-        rollDice,
-        unselectDice,
-        resetRerolls,
-        updateScoreCardValue,
+        invoke,
     } = useStore() as StagedState<ActiveGameState>;
     const scoredValue = scoreCardValues[index].value;
     const locked = scoredValue !== null;
@@ -61,10 +58,10 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
             return;
         }
 
-        updateScoreCardValue(index, score);
-        unselectDice();
-        resetRerolls();
-        rollDice();
+        invoke({ type: 'UpdateScoreCardValue', index, value: score });
+        invoke({ type: 'UnselectDice' });
+        invoke({ type: 'ResetRerolls' });
+        invoke({ type: 'RollDice' });
     }
 
     return (
@@ -91,8 +88,7 @@ export function ActiveGameUi() {
         stateMachine: {
             currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues },
         },
-        rollDice,
-        sortDice,
+        invoke,
     } = useStore() as StagedState<ActiveGameState>;
     const [isOpen, setIsOpen] = useState(false);
     const arrowRef = useRef(null);
@@ -107,7 +103,7 @@ export function ActiveGameUi() {
 
     function roll() {
         if (rerolls > 0) {
-            rollDice();
+            invoke({ type: 'RollDice' });
         }
     }
 
@@ -151,7 +147,7 @@ export function ActiveGameUi() {
                     )}
                     <button
                         className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-7 hover:from-emerald-600 hover:to-emerald-900"
-                        onClick={sortDice}
+                        onClick={() => invoke({ type: 'SortDice' })}
                     >
                         <ArrowUpDownIcon />
                     </button>
