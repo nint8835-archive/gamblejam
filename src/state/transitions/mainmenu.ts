@@ -1,4 +1,3 @@
-import { ScoreCardEntries, type ScoreCardEntryId } from '../../definitions/scorecard';
 import type { Transition } from '../types';
 import { RollDiceTransition } from './activegame';
 
@@ -16,10 +15,7 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
                 selectedDice: [],
                 rerolls: 4,
 
-                scoreCardValues: Object.keys(ScoreCardEntries).map((entryId) => ({
-                    entryId: entryId as ScoreCardEntryId,
-                    value: null,
-                })),
+                scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
                 totalScore: 0,
             },
         };

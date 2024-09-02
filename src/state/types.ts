@@ -31,6 +31,8 @@ export type Stage = StateMachine['stage'];
 
 export type State = {
     stateMachine: StateMachine;
+
+    scoreCardContents: ScoreCardEntryId[];
 };
 
 export type Actions = {
