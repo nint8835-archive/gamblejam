@@ -114,7 +114,7 @@ export function ActiveGameUi() {
                         </div>
                         <div className="italic text-red-300">({rerolls} rerolls)</div>
                     </button>
-                    {isMounted && selectedDice.length === 0 && (
+                    {isMounted && selectedDice.length === 0 && rerolls > 0 && (
                         <div
                             ref={refs.setFloating}
                             style={{ ...floatingStyles, ...transitionStyles }}
