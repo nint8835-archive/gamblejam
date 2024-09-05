@@ -78,6 +78,7 @@ export function ActiveGameUi() {
             currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues, targetScore },
         },
         invoke,
+        devMode,
     } = useStore() as StagedState<ActiveGameState>;
     const [isOpen, setIsOpen] = useState(false);
     const arrowRef = useRef(null);
@@ -89,6 +90,20 @@ export function ActiveGameUi() {
     const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
     const hover = useHover(context);
     const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
+
+    function devModeWin() {
+        invoke({
+            type: 'ForceStageChange',
+            newMachine: { stage: 'GameWon', totalEarnings: 0, unusedCardEarnings: 0 },
+        });
+    }
+
+    function devModeLose() {
+        invoke({
+            type: 'ForceStageChange',
+            newMachine: { stage: 'GameLost', totalScore, targetScore },
+        });
+    }
 
     return (
         <div className="grid items-center justify-center gap-2 p-4 sm:grid-cols-1 md:grid-cols-2">
@@ -150,6 +165,23 @@ export function ActiveGameUi() {
                     <div className="text-2xl font-semibold">{targetScore}</div>
                 </div>
             </div>
+
+            {devMode && (
+                <div className="absolute bottom-0 right-0 space-x-2 p-4">
+                    <button
+                        className="rounded-md bg-green-700 px-4 py-2 transition-colors hover:bg-green-900"
+                        onClick={devModeWin}
+                    >
+                        Win
+                    </button>
+                    <button
+                        className="rounded-md bg-red-700 px-4 py-2 transition-colors hover:bg-red-900"
+                        onClick={devModeLose}
+                    >
+                        Lose
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

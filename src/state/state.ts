@@ -10,6 +10,8 @@ const initialState: State = {
         stage: 'MainMenu',
     },
 
+    devMode: false,
+
     scoreCardContents: Object.keys(ScoreCardEntries) as ScoreCardEntryId[],
     money: 5,
 };
@@ -30,6 +32,15 @@ export const useStore = create<CompleteState>()(
             },
 
             reset: () => set(() => initialState, undefined, 'reset'),
+
+            toggleDevMode: () =>
+                set(
+                    (state) => {
+                        state.devMode = !state.devMode;
+                    },
+                    undefined,
+                    'toggleDevMode',
+                ),
         })),
     ),
 );

@@ -3,8 +3,8 @@ import { GameWonState, StagedState } from '../state/types';
 
 export function GameWonUi() {
     const {
-        reset,
         stateMachine: { unusedCardEarnings, totalEarnings },
+        invoke,
     } = useStore() as StagedState<GameWonState>;
     return (
         <div className="flex h-screen flex-col items-center justify-center gap-8">
@@ -27,10 +27,10 @@ export function GameWonUi() {
             </div>
 
             <button
-                className="rounded-md bg-gradient-to-b from-red-500 to-red-700 px-8 py-2 text-2xl font-semibold hover:from-red-700 hover:to-red-900"
-                onClick={reset}
+                className="rounded-md bg-gradient-to-b from-green-500 to-green-700 px-8 py-2 text-2xl font-semibold hover:from-green-700 hover:to-green-900"
+                onClick={() => invoke({ type: 'Continue' })}
             >
-                Quit
+                Continue
             </button>
         </div>
     );

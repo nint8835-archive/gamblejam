@@ -38,12 +38,18 @@ export type GameWonState = {
     totalEarnings: number;
 };
 
-export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState;
+export type ShopState = {
+    stage: 'Shop';
+};
+
+export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState | ShopState;
 
 export type Stage = StateMachine['stage'];
 
 export type State = {
     stateMachine: StateMachine;
+
+    devMode: boolean;
 
     scoreCardContents: ScoreCardEntryId[];
     money: number;
@@ -52,6 +58,7 @@ export type State = {
 export type Actions = {
     invoke: (invocation: TransitionInvocation) => void;
     reset: () => void;
+    toggleDevMode: () => void;
 };
 
 export type CompleteState = State & Actions;
@@ -59,6 +66,6 @@ export type CompleteState = State & Actions;
 export type StagedState<T extends StateMachine> = CompleteState & { stateMachine: T };
 
 export type Transition<T> = {
-    permittedStates: Stage[];
+    permittedStates?: Stage[];
     invoke: (state: WritableDraft<CompleteState>, invocation: T) => void;
 };

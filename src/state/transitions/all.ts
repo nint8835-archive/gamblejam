@@ -1,9 +1,19 @@
 import type { WritableDraft } from 'immer';
-import type { CompleteState, Transition } from '../types';
+import type { CompleteState, StateMachine, Transition } from '../types';
 import { ActiveGameTransitionInvocations, ActiveGameTransitions } from './activegame';
+import { GameEndTransitionInvocations, GameEndTransitions } from './gameend';
 import { type MainMenuTransitionInvocations, MainMenuTransitions } from './mainmenu';
 
-export type TransitionInvocation = MainMenuTransitionInvocations | ActiveGameTransitionInvocations;
+export type ForceStageChangeTransitionInvocation = {
+    type: 'ForceStageChange';
+    newMachine: StateMachine;
+};
+
+export type TransitionInvocation =
+    | MainMenuTransitionInvocations
+    | ActiveGameTransitionInvocations
+    | GameEndTransitionInvocations
+    | ForceStageChangeTransitionInvocation;
 
 type TransitionHandlers<T extends { type: string }> = {
     [P in T['type']]: Transition<Extract<T, { type: P }>>;
@@ -12,13 +22,21 @@ type TransitionHandlers<T extends { type: string }> = {
 const transitions: TransitionHandlers<TransitionInvocation> = {
     ...MainMenuTransitions,
     ...ActiveGameTransitions,
+    ...GameEndTransitions,
+
+    ForceStageChange: {
+        permittedStates: ['MainMenu', 'ActiveGame', 'GameLost', 'GameWon', 'Shop'],
+        invoke: (state, invocation) => {
+            state.stateMachine = invocation.newMachine;
+        },
+    },
 };
 
 export function invokeTransition<T extends TransitionInvocation>(state: WritableDraft<CompleteState>, invocation: T) {
     // TODO: I've spent too long battling this type error. I feel like this type cast shouldn't be required.
     const transition = transitions[invocation.type] as Transition<T>;
 
-    if (!transition.permittedStates.includes(state.stateMachine.stage)) {
+    if (transition.permittedStates && !transition.permittedStates.includes(state.stateMachine.stage)) {
         throw new Error(`Cannot invoke transition "${invocation.type}" when in stage "${state.stateMachine.stage}"`);
     }
 
