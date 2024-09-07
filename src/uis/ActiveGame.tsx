@@ -174,14 +174,17 @@ export function ActiveGameUi() {
             </div>
 
             <div className="flex min-h-0 flex-1 shrink grid-cols-2 flex-col gap-2 p-4 md:h-screen">
-                <div className="col-span-2 flex flex-row items-center justify-between gap-2">
-                    <div className="text-2xl font-black">Total score</div>
-                    <div className="text-2xl font-semibold">{totalScore}</div>
+                <div className="flex flex-col justify-between md:flex-row">
+                    <div className="flex flex-row items-center justify-between gap-2">
+                        <div className="text-2xl font-black">Total score</div>
+                        <div className="text-2xl font-medium">{totalScore}</div>
+                    </div>
+                    <div className="flex flex-row items-center justify-between gap-2">
+                        <div className="text-2xl font-black">Target score</div>
+                        <div className="text-2xl font-medium">{targetScore}</div>
+                    </div>
                 </div>
-                <div className="col-span-2 flex flex-row items-center justify-between gap-2">
-                    <div className="text-2xl font-black">Target score</div>
-                    <div className="text-2xl font-semibold">{targetScore}</div>
-                </div>
+
                 <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-auto">
                     {/* If something weird happens here, Dan told me so */}
                     {sortedScoreCardEntries.map((entry) => (
