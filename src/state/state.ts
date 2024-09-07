@@ -14,6 +14,7 @@ const initialState: State = {
 
     scoreCardContents: Object.keys(ScoreCardEntries) as ScoreCardEntryId[],
     money: 5,
+    rerolls: 3,
 };
 
 export const useStore = create<CompleteState>()(

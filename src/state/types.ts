@@ -1,4 +1,5 @@
 import { type WritableDraft } from 'immer';
+import { type ItemId } from '../definitions/items';
 import { type ScoreCardEntryId } from '../definitions/scorecard';
 import { type TransitionInvocation } from './transitions/all';
 
@@ -43,6 +44,7 @@ export type ShopState = {
     rerollCost: number;
 
     availableScoreCardEntries: ScoreCardEntryId[];
+    availableItems: ItemId[];
 };
 
 export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState | ShopState;
@@ -56,6 +58,7 @@ export type State = {
 
     scoreCardContents: ScoreCardEntryId[];
     money: number;
+    rerolls: number;
 };
 
 export type Actions = {

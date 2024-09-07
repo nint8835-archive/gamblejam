@@ -13,7 +13,7 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
             currentGame: {
                 dice: [0, 0, 0, 0, 0],
                 selectedDice: [],
-                rerolls: 4,
+                rerolls: state.rerolls + 1,
 
                 scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
                 totalScore: 0,

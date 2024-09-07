@@ -1,10 +1,12 @@
 import { WritableDraft } from 'immer';
+import { type ItemId, Items } from '../../definitions/items';
 import { ScoreCardEntries, type ScoreCardEntryId } from '../../definitions/scorecard';
 import { range } from '../../util';
 import type { ShopState, StagedState, State, Transition } from '../types';
 
 export function rollShop(state: WritableDraft<State>): ShopState {
     const allScoreCardEntries = Object.keys(ScoreCardEntries) as ScoreCardEntryId[];
+    const allItems = Object.keys(Items) as ItemId[];
 
     const currentRerollCost = state.stateMachine.stage === 'Shop' ? state.stateMachine.rerollCost : 1;
 
@@ -14,6 +16,7 @@ export function rollShop(state: WritableDraft<State>): ShopState {
         availableScoreCardEntries: range(0, 2).map(
             () => allScoreCardEntries[Math.floor(Math.random() * allScoreCardEntries.length)],
         ),
+        availableItems: range(0, 2).map(() => allItems[Math.floor(Math.random() * allItems.length)]),
     };
 }
 
@@ -41,6 +44,33 @@ export const BuyScoreCardEntryTransition: Transition<BuyScoreCardEntryTransition
         shop.availableScoreCardEntries = shop.availableScoreCardEntries.filter((_, i) => i !== index);
         state.money -= scoreCardEntry.shopCost;
         state.scoreCardContents.push(scoreCardEntryId);
+    },
+};
+
+export type BuyItemTransitionInvocation = {
+    type: 'BuyItem';
+    index: number;
+};
+
+export const BuyItemTransition: Transition<BuyItemTransitionInvocation> = {
+    permittedStates: ['Shop'],
+    invoke: (state, { index }) => {
+        const shop = state.stateMachine as WritableDraft<ShopState>;
+        const itemId = shop.availableItems[index];
+
+        if (itemId === undefined) {
+            throw new Error('Invalid item index');
+        }
+
+        const item = Items[itemId];
+
+        if (state.money < item.shopCost) {
+            throw new Error('Insufficient funds to purchase item');
+        }
+
+        shop.availableItems = shop.availableItems.filter((_, i) => i !== index);
+        state.money -= item.shopCost;
+        item.effect(state);
     },
 };
 
@@ -74,7 +104,7 @@ export const ExitShopTransition: Transition<ExitShopTransitionInvocation> = {
             currentGame: {
                 dice: [0, 0, 0, 0, 0],
                 selectedDice: [],
-                rerolls: 4,
+                rerolls: state.rerolls + 1,
                 scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
                 totalScore: 0,
                 targetScore: 100,
@@ -85,11 +115,13 @@ export const ExitShopTransition: Transition<ExitShopTransitionInvocation> = {
 
 export type ShopTransitionInvocations =
     | BuyScoreCardEntryTransitionInvocation
+    | BuyItemTransitionInvocation
     | RerollShopTransitionInvocation
     | ExitShopTransitionInvocation;
 
 export const ShopTransitions = {
     BuyScoreCardEntry: BuyScoreCardEntryTransition,
+    BuyItem: BuyItemTransition,
     RerollShop: RerollShopTransition,
     ExitShop: ExitShopTransition,
 };

@@ -75,7 +75,7 @@ export const ResetRerollsTransition: Transition<ResetRerollsTransitionInvocation
     invoke: (state, _) => {
         const currentGame = (state.stateMachine as WritableDraft<ActiveGameState>).currentGame;
 
-        currentGame.rerolls = 4;
+        currentGame.rerolls = state.rerolls + 1;
     },
 };
 

@@ -1,3 +1,4 @@
+import { ItemId, Items } from '../definitions/items';
 import { ScoreCardEntries, ScoreCardEntryId } from '../definitions/scorecard';
 import { useStore } from '../state/state';
 import { ShopState, StagedState } from '../state/types';
@@ -28,11 +29,34 @@ function ScoreCardEntryShopItem({ entry, index }: { entry: ScoreCardEntryId; ind
     );
 }
 
+function ItemShopItem({ item, index }: { item: ItemId; index: number }) {
+    const { invoke, money } = useStore() as StagedState<ShopState>;
+
+    const itemDetails = Items[item];
+
+    return (
+        <div
+            className={cn(
+                'flex w-full cursor-pointer flex-row items-center justify-between rounded-md border-2 border-zinc-900 bg-zinc-700 p-2 transition-colors',
+                money >= itemDetails.shopCost && 'hover:bg-zinc-900',
+                money < itemDetails.shopCost && 'cursor-not-allowed opacity-50',
+            )}
+            onClick={() => invoke({ type: 'BuyItem', index })}
+        >
+            <div>
+                <div className="text-xl font-bold">{itemDetails.name}</div>
+                <div className="italic text-zinc-400">{itemDetails.description}</div>
+            </div>
+            <div className="text-lg font-semibold">{itemDetails.shopCost}</div>
+        </div>
+    );
+}
+
 export function ShopUi() {
     const {
         money,
         devMode,
-        stateMachine: { availableScoreCardEntries, rerollCost },
+        stateMachine: { availableScoreCardEntries, rerollCost, availableItems },
         invoke,
     } = useStore() as StagedState<ShopState>;
 
@@ -72,7 +96,7 @@ export function ShopUi() {
                     </button>
                 </div>
             </div>
-            <div className="mt-2 grid grid-rows-1">
+            <div className="mt-2 flex flex-col gap-4">
                 <div className="space-y-2 rounded-md bg-zinc-800 p-2">
                     <h2 className="flex justify-center text-2xl font-semibold text-rose-500">Score Card Entries</h2>
                     <div className="flex flex-row justify-between gap-4">
@@ -80,6 +104,19 @@ export function ShopUi() {
                             <ScoreCardEntryShopItem entry={entry} index={index} />
                         ))}
                         {availableScoreCardEntries.length === 0 && (
+                            <div className="flex w-full items-center justify-center text-xl font-medium italic text-zinc-400">
+                                Sold out!
+                            </div>
+                        )}
+                    </div>
+                </div>
+                <div className="space-y-2 rounded-md bg-zinc-800 p-2">
+                    <h2 className="flex justify-center text-2xl font-semibold text-rose-500">Items</h2>
+                    <div className="flex flex-row justify-between gap-4">
+                        {availableItems.map((item, index) => (
+                            <ItemShopItem item={item} index={index} />
+                        ))}
+                        {availableItems.length === 0 && (
                             <div className="flex w-full items-center justify-center text-xl font-medium italic text-zinc-400">
                                 Sold out!
                             </div>
