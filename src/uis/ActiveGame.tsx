@@ -48,8 +48,12 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
         },
         invoke,
     } = useStore() as StagedState<ActiveGameState>;
+    const entryId = scoreCardValues[index].entryId;
     const scoredValue = scoreCardValues[index].value;
     const locked = scoredValue !== null;
+    const otherCount = scoreCardValues
+        .filter((entry) => entry.entryId === entryId)
+        .filter((entry) => entry.value === null).length;
     const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
     const nonScoring = score === 0 && !locked;
 
@@ -66,6 +70,7 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
             <div>
                 <div className={cn('text-2xl font-bold transition-colors', nonScoring && 'text-zinc-500')}>{name}</div>
                 <div className="italic text-zinc-400">{description}</div>
+                {!locked && <div className="mt-4 text-xs text-zinc-400">{`${otherCount} available`}</div>}
             </div>
             <div className={cn('text-xl font-medium transition-colors', nonScoring && 'text-zinc-500')}>{score}</div>
         </div>
@@ -109,6 +114,13 @@ export function ActiveGameUi() {
                 return b.score - a.score;
             } else {
                 return a.name.localeCompare(b.name);
+            }
+        })
+        .filter((entry, index, self) => {
+            if (!entry.locked) {
+                return self.findIndex((e) => e.name === entry.name) === index;
+            } else {
+                return true;
             }
         });
 
