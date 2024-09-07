@@ -106,8 +106,8 @@ export function ActiveGameUi() {
     }
 
     return (
-        <div className="grid items-center justify-center gap-2 p-4 sm:grid-cols-1 md:grid-cols-2">
-            <div className="space-y-4">
+        <div className="flex h-screen grid-cols-2 flex-col items-center gap-2 md:grid md:h-auto">
+            <div className="h-auto w-full space-y-4 p-4 md:w-auto">
                 <div className="flex w-full flex-row justify-between gap-2">
                     {dice.map((value, index) => (
                         <Die key={index} value={value} index={index} />
@@ -152,10 +152,7 @@ export function ActiveGameUi() {
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-                {scoreCardValues.map((entry, index) => (
-                    <ScoreCardEntry key={index} index={index} {...ScoreCardEntries[entry.entryId]} />
-                ))}
+            <div className="flex min-h-0 flex-1 shrink grid-cols-2 flex-col gap-2 p-4 md:h-screen">
                 <div className="col-span-2 flex flex-row items-center justify-between gap-2">
                     <div className="text-2xl font-black">Total score</div>
                     <div className="text-2xl font-semibold">{totalScore}</div>
@@ -164,10 +161,15 @@ export function ActiveGameUi() {
                     <div className="text-2xl font-black">Target score</div>
                     <div className="text-2xl font-semibold">{targetScore}</div>
                 </div>
+                <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-auto">
+                    {scoreCardValues.map((entry, index) => (
+                        <ScoreCardEntry key={index} index={index} {...ScoreCardEntries[entry.entryId]} />
+                    ))}
+                </div>
             </div>
 
             {devMode && (
-                <div className="absolute bottom-0 right-0 space-x-2 p-4">
+                <div className="absolute bottom-0 left-0 space-x-2 p-4">
                     <button
                         className="rounded-md bg-green-700 px-4 py-2 transition-colors hover:bg-green-900"
                         onClick={devModeWin}
