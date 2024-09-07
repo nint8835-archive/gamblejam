@@ -40,6 +40,8 @@ export type GameWonState = {
 
 export type ShopState = {
     stage: 'Shop';
+
+    availableScoreCardEntries: ScoreCardEntryId[];
 };
 
 export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState | ShopState;

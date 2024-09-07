@@ -2,7 +2,8 @@ import type { WritableDraft } from 'immer';
 import type { CompleteState, StateMachine, Transition } from '../types';
 import { ActiveGameTransitionInvocations, ActiveGameTransitions } from './activegame';
 import { GameEndTransitionInvocations, GameEndTransitions } from './gameend';
-import { type MainMenuTransitionInvocations, MainMenuTransitions } from './mainmenu';
+import { MainMenuTransitions, type MainMenuTransitionInvocations } from './mainmenu';
+import { ShopTransitions, type ShopTransitionInvocations } from './shop';
 
 export type ForceStageChangeTransitionInvocation = {
     type: 'ForceStageChange';
@@ -13,6 +14,7 @@ export type TransitionInvocation =
     | MainMenuTransitionInvocations
     | ActiveGameTransitionInvocations
     | GameEndTransitionInvocations
+    | ShopTransitionInvocations
     | ForceStageChangeTransitionInvocation;
 
 type TransitionHandlers<T extends { type: string }> = {
@@ -23,6 +25,7 @@ const transitions: TransitionHandlers<TransitionInvocation> = {
     ...MainMenuTransitions,
     ...ActiveGameTransitions,
     ...GameEndTransitions,
+    ...ShopTransitions,
 
     ForceStageChange: {
         permittedStates: ['MainMenu', 'ActiveGame', 'GameLost', 'GameWon', 'Shop'],
