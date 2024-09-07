@@ -97,8 +97,18 @@ export function ActiveGameUi() {
             index,
             ...ScoreCardEntries[entry.entryId],
             score: ScoreCardEntries[entry.entryId].scoreFunc(dice),
+            scoreCardValue: entry.value,
+            locked: entry.value !== null,
         }))
-        .sort((a, b) => b.score - a.score);
+        .sort((a, b) => {
+            if (!a.locked && b.locked) {
+                return -1;
+            } else if (a.locked && !b.locked) {
+                return 1;
+            } else {
+                return b.score - a.score;
+            }
+        });
 
     function devModeWin() {
         invoke({
