@@ -1,21 +1,17 @@
 import type { WritableDraft } from 'immer';
-import type { CompleteState, StateMachine, Transition } from '../types';
+import type { CompleteState, Transition } from '../types';
 import { ActiveGameTransitionInvocations, ActiveGameTransitions } from './activegame';
+import { DevTransitionInvocations, DevTransitions } from './dev';
 import { GameEndTransitionInvocations, GameEndTransitions } from './gameend';
 import { MainMenuTransitions, type MainMenuTransitionInvocations } from './mainmenu';
 import { ShopTransitions, type ShopTransitionInvocations } from './shop';
-
-export type ForceStageChangeTransitionInvocation = {
-    type: 'ForceStageChange';
-    newMachine: StateMachine;
-};
 
 export type TransitionInvocation =
     | MainMenuTransitionInvocations
     | ActiveGameTransitionInvocations
     | GameEndTransitionInvocations
     | ShopTransitionInvocations
-    | ForceStageChangeTransitionInvocation;
+    | DevTransitionInvocations;
 
 type TransitionHandlers<T extends { type: string }> = {
     [P in T['type']]: Transition<Extract<T, { type: P }>>;
@@ -26,13 +22,7 @@ const transitions: TransitionHandlers<TransitionInvocation> = {
     ...ActiveGameTransitions,
     ...GameEndTransitions,
     ...ShopTransitions,
-
-    ForceStageChange: {
-        permittedStates: ['MainMenu', 'ActiveGame', 'GameLost', 'GameWon', 'Shop'],
-        invoke: (state, invocation) => {
-            state.stateMachine = invocation.newMachine;
-        },
-    },
+    ...DevTransitions,
 };
 
 export function invokeTransition<T extends TransitionInvocation>(state: WritableDraft<CompleteState>, invocation: T) {

@@ -31,6 +31,7 @@ function ScoreCardEntryShopItem({ entry, index }: { entry: ScoreCardEntryId; ind
 export function ShopUi() {
     const {
         money,
+        devMode,
         stateMachine: { availableScoreCardEntries },
         invoke,
     } = useStore() as StagedState<ShopState>;
@@ -44,7 +45,15 @@ export function ShopUi() {
                         Shop
                     </h1>
                 </div>
-                <div className="flex w-full items-center justify-end">
+                <div className="flex w-full items-center justify-end gap-2">
+                    {devMode && (
+                        <button
+                            className="rounded-md bg-amber-600 px-4 py-2 transition-colors hover:bg-amber-800"
+                            onClick={() => invoke({ type: 'SetMoney', amount: 10000 })}
+                        >
+                            Give Money
+                        </button>
+                    )}
                     <button
                         className="text-md rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium hover:from-green-700 hover:to-green-900"
                         onClick={() => invoke({ type: 'ExitShop' })}
@@ -60,6 +69,11 @@ export function ShopUi() {
                         {availableScoreCardEntries.map((entry, index) => (
                             <ScoreCardEntryShopItem entry={entry} index={index} />
                         ))}
+                        {availableScoreCardEntries.length === 0 && (
+                            <div className="flex w-full items-center justify-center text-xl font-medium italic text-zinc-400">
+                                Sold out!
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
