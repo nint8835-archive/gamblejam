@@ -32,7 +32,7 @@ export function ShopUi() {
     const {
         money,
         devMode,
-        stateMachine: { availableScoreCardEntries },
+        stateMachine: { availableScoreCardEntries, rerollCost },
         invoke,
     } = useStore() as StagedState<ShopState>;
 
@@ -55,10 +55,14 @@ export function ShopUi() {
                         </button>
                     )}
                     <button
-                        className="rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium hover:from-green-700 hover:to-green-900"
+                        className={cn(
+                            'rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium',
+                            money < rerollCost && 'cursor-not-allowed opacity-50',
+                            money >= rerollCost && 'hover:from-green-700 hover:to-green-900',
+                        )}
                         onClick={() => invoke({ type: 'RerollShop' })}
                     >
-                        Reroll
+                        {`Reroll ($${rerollCost})`}
                     </button>
                     <button
                         className="text-md rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium hover:from-green-700 hover:to-green-900"

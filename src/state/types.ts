@@ -40,6 +40,7 @@ export type GameWonState = {
 
 export type ShopState = {
     stage: 'Shop';
+    rerollCost: number;
 
     availableScoreCardEntries: ScoreCardEntryId[];
 };
