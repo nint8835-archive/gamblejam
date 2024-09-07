@@ -91,6 +91,15 @@ export function ActiveGameUi() {
     const hover = useHover(context);
     const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
+    const sortedScoreCardEntries = scoreCardValues
+        .map((entry, index) => ({
+            key: index,
+            index,
+            ...ScoreCardEntries[entry.entryId],
+            score: ScoreCardEntries[entry.entryId].scoreFunc(dice),
+        }))
+        .sort((a, b) => b.score - a.score);
+
     function devModeWin() {
         invoke({
             type: 'ForceStageChange',
@@ -162,8 +171,9 @@ export function ActiveGameUi() {
                     <div className="text-2xl font-semibold">{targetScore}</div>
                 </div>
                 <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-auto">
-                    {scoreCardValues.map((entry, index) => (
-                        <ScoreCardEntry key={index} index={index} {...ScoreCardEntries[entry.entryId]} />
+                    {/* If something weird happens here, Dan told me so */}
+                    {sortedScoreCardEntries.map((entry) => (
+                        <ScoreCardEntry {...entry} />
                     ))}
                 </div>
             </div>
