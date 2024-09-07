@@ -55,6 +55,12 @@ export function ShopUi() {
                         </button>
                     )}
                     <button
+                        className="rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium hover:from-green-700 hover:to-green-900"
+                        onClick={() => invoke({ type: 'RerollShop' })}
+                    >
+                        Reroll
+                    </button>
+                    <button
                         className="text-md rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium hover:from-green-700 hover:to-green-900"
                         onClick={() => invoke({ type: 'ExitShop' })}
                     >

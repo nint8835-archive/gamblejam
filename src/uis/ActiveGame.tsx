@@ -101,12 +101,14 @@ export function ActiveGameUi() {
             locked: entry.value !== null,
         }))
         .sort((a, b) => {
-            if (!a.locked && b.locked) {
-                return -1;
-            } else if (a.locked && !b.locked) {
+            if (a.locked && !b.locked) {
                 return 1;
-            } else {
+            } else if (!a.locked && b.locked) {
+                return -1;
+            } else if (a.score !== b.score) {
                 return b.score - a.score;
+            } else {
+                return a.name.localeCompare(b.name);
             }
         });
 

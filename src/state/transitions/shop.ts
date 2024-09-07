@@ -1,6 +1,18 @@
 import { WritableDraft } from 'immer';
-import { ScoreCardEntries } from '../../definitions/scorecard';
-import type { ShopState, Transition } from '../types';
+import { ScoreCardEntries, type ScoreCardEntryId } from '../../definitions/scorecard';
+import { range } from '../../util';
+import type { ShopState, StagedState, State, Transition } from '../types';
+
+export function rollShop(state: WritableDraft<State>): ShopState {
+    const allScoreCardEntries = Object.keys(ScoreCardEntries) as ScoreCardEntryId[];
+
+    return {
+        stage: 'Shop',
+        availableScoreCardEntries: range(0, 2).map(
+            () => allScoreCardEntries[Math.floor(Math.random() * allScoreCardEntries.length)],
+        ),
+    };
+}
 
 export type BuyScoreCardEntryTransitionInvocation = {
     type: 'BuyScoreCardEntry';
@@ -29,6 +41,17 @@ export const BuyScoreCardEntryTransition: Transition<BuyScoreCardEntryTransition
     },
 };
 
+export type RerollShopTransitionInvocation = {
+    type: 'RerollShop';
+};
+
+export const RerollShopTransition: Transition<RerollShopTransitionInvocation> = {
+    permittedStates: ['Shop'],
+    invoke: (state, _) => {
+        (state as WritableDraft<StagedState<ShopState>>).stateMachine = rollShop(state);
+    },
+};
+
 export type ExitShopTransitionInvocation = {
     type: 'ExitShop';
 };
@@ -50,9 +73,13 @@ export const ExitShopTransition: Transition<ExitShopTransitionInvocation> = {
     },
 };
 
-export type ShopTransitionInvocations = BuyScoreCardEntryTransitionInvocation | ExitShopTransitionInvocation;
+export type ShopTransitionInvocations =
+    | BuyScoreCardEntryTransitionInvocation
+    | RerollShopTransitionInvocation
+    | ExitShopTransitionInvocation;
 
 export const ShopTransitions = {
     BuyScoreCardEntry: BuyScoreCardEntryTransition,
+    RerollShop: RerollShopTransition,
     ExitShop: ExitShopTransition,
 };
