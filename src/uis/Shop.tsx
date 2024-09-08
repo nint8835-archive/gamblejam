@@ -52,77 +52,103 @@ function ItemShopItem({ item, index }: { item: ItemId; index: number }) {
     );
 }
 
-export function ShopUi() {
+function ScoreCardEntriesUi() {
+    const {
+        stateMachine: { availableScoreCardEntries },
+    } = useStore() as StagedState<ShopState>;
+
+    return (
+        <div className="space-y-2 rounded-md bg-zinc-800 p-2">
+            <h2 className="flex justify-center text-2xl font-semibold text-rose-500">Score Card Entries</h2>
+            <div className="flex flex-row justify-between gap-4">
+                {availableScoreCardEntries.map((entry, index) => (
+                    <ScoreCardEntryShopItem entry={entry} index={index} />
+                ))}
+                {availableScoreCardEntries.length === 0 && (
+                    <div className="flex w-full items-center justify-center text-xl font-medium italic text-zinc-400">
+                        Sold out!
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function ItemsUi() {
+    const {
+        stateMachine: { availableItems },
+    } = useStore() as StagedState<ShopState>;
+
+    return (
+        <div className="space-y-2 rounded-md bg-zinc-800 p-2">
+            <h2 className="flex justify-center text-2xl font-semibold text-rose-500">Items</h2>
+            <div className="flex flex-row justify-between gap-4">
+                {availableItems.map((item, index) => (
+                    <ItemShopItem item={item} index={index} />
+                ))}
+                {availableItems.length === 0 && (
+                    <div className="flex w-full items-center justify-center text-xl font-medium italic text-zinc-400">
+                        Sold out!
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function TopBar() {
     const {
         money,
         devMode,
-        stateMachine: { availableScoreCardEntries, rerollCost, availableItems },
+        stateMachine: { rerollCost },
         invoke,
     } = useStore() as StagedState<ShopState>;
 
     return (
-        <div className="p-4">
-            <div className="grid grid-cols-3">
-                <div className="flex w-full items-center justify-start text-2xl font-semibold text-green-500">{`$${money}`}</div>
-                <div className="flex w-full items-center justify-center">
-                    <h1 className="w-fit bg-gradient-to-br from-green-300 via-blue-500 to-purple-600 bg-clip-text text-4xl font-black leading-normal text-transparent">
-                        Shop
-                    </h1>
-                </div>
-                <div className="flex w-full items-center justify-end gap-2">
-                    {devMode && (
-                        <button
-                            className="rounded-md bg-amber-600 px-4 py-2 transition-colors hover:bg-amber-800"
-                            onClick={() => invoke({ type: 'SetMoney', amount: 10000 })}
-                        >
-                            Give Money
-                        </button>
-                    )}
-                    <button
-                        className={cn(
-                            'rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium',
-                            money < rerollCost && 'cursor-not-allowed opacity-50',
-                            money >= rerollCost && 'hover:from-green-700 hover:to-green-900',
-                        )}
-                        onClick={() => invoke({ type: 'RerollShop' })}
-                    >
-                        {`Reroll ($${rerollCost})`}
-                    </button>
-                    <button
-                        className="text-md rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium hover:from-green-700 hover:to-green-900"
-                        onClick={() => invoke({ type: 'ExitShop' })}
-                    >
-                        Continue
-                    </button>
-                </div>
+        <div className="grid grid-cols-3">
+            <div className="flex w-full items-center justify-start text-2xl font-semibold text-green-500">{`$${money}`}</div>
+            <div className="flex w-full items-center justify-center">
+                <h1 className="w-fit bg-gradient-to-br from-green-300 via-blue-500 to-purple-600 bg-clip-text text-4xl font-black leading-normal text-transparent">
+                    Shop
+                </h1>
             </div>
+            <div className="flex w-full items-center justify-end gap-2">
+                {devMode && (
+                    <button
+                        className="rounded-md bg-amber-600 px-4 py-2 transition-colors hover:bg-amber-800"
+                        onClick={() => invoke({ type: 'SetMoney', amount: 10000 })}
+                    >
+                        Give Money
+                    </button>
+                )}
+                <button
+                    className={cn(
+                        'rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium',
+                        money < rerollCost && 'cursor-not-allowed opacity-50',
+                        money >= rerollCost && 'hover:from-green-700 hover:to-green-900',
+                    )}
+                    onClick={() => invoke({ type: 'RerollShop' })}
+                >
+                    {`Reroll ($${rerollCost})`}
+                </button>
+                <button
+                    className="text-md rounded-md bg-gradient-to-b from-green-500 to-green-700 px-4 py-2 font-medium hover:from-green-700 hover:to-green-900"
+                    onClick={() => invoke({ type: 'ExitShop' })}
+                >
+                    Continue
+                </button>
+            </div>
+        </div>
+    );
+}
+
+export function ShopUi() {
+    return (
+        <div className="p-4">
+            <TopBar />
             <div className="mt-2 flex flex-col gap-4">
-                <div className="space-y-2 rounded-md bg-zinc-800 p-2">
-                    <h2 className="flex justify-center text-2xl font-semibold text-rose-500">Score Card Entries</h2>
-                    <div className="flex flex-row justify-between gap-4">
-                        {availableScoreCardEntries.map((entry, index) => (
-                            <ScoreCardEntryShopItem entry={entry} index={index} />
-                        ))}
-                        {availableScoreCardEntries.length === 0 && (
-                            <div className="flex w-full items-center justify-center text-xl font-medium italic text-zinc-400">
-                                Sold out!
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <div className="space-y-2 rounded-md bg-zinc-800 p-2">
-                    <h2 className="flex justify-center text-2xl font-semibold text-rose-500">Items</h2>
-                    <div className="flex flex-row justify-between gap-4">
-                        {availableItems.map((item, index) => (
-                            <ItemShopItem item={item} index={index} />
-                        ))}
-                        {availableItems.length === 0 && (
-                            <div className="flex w-full items-center justify-center text-xl font-medium italic text-zinc-400">
-                                Sold out!
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <ScoreCardEntriesUi />
+                <ItemsUi />
             </div>
         </div>
     );

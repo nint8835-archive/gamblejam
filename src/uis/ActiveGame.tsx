@@ -78,14 +78,52 @@ function ScoreCardEntry({ name, description, className, index }: ScoreCardEntryP
     );
 }
 
-export function ActiveGameUi() {
+function Dice() {
+    const {
+        stateMachine: {
+            currentGame: { dice, rerolls },
+        },
+        invoke,
+    } = useStore() as StagedState<ActiveGameState>;
+
+    return (
+        <div className="h-auto w-full space-y-4 p-4 md:w-auto">
+            <div className="flex w-full flex-row justify-between gap-2">
+                {dice.map((value, index) => (
+                    <Die key={index} value={value} index={index} />
+                ))}
+            </div>
+            <div className="flex flex-row gap-2">
+                <button
+                    className={cn(
+                        'flex h-full flex-1 flex-col items-center justify-center rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4',
+                        rerolls > 0 && 'hover:from-red-600 hover:to-red-900',
+                        rerolls === 0 && 'cursor-not-allowed from-red-800 to-red-950',
+                    )}
+                    onClick={() => invoke({ type: 'RollDice' })}
+                >
+                    <div className="flex flex-row">
+                        <DicesIcon className="mr-2" /> Roll
+                    </div>
+                    <div className="italic text-red-300">({rerolls} rerolls)</div>
+                </button>
+                <button
+                    className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-7 hover:from-emerald-600 hover:to-emerald-900"
+                    onClick={() => invoke({ type: 'SortDice' })}
+                >
+                    <ArrowUpDownIcon />
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function ScoreCard() {
     const {
         stateMachine,
         stateMachine: {
-            currentGame: { dice, totalScore, rerolls, scoreCardValues, targetScore },
+            currentGame: { totalScore, targetScore, scoreCardValues },
         },
-        invoke,
-        devMode,
     } = useStore() as StagedState<ActiveGameState>;
 
     const sortedScoreCardEntries = scoreCardValues
@@ -116,6 +154,38 @@ export function ActiveGameUi() {
             }
         });
 
+    return (
+        <div className="flex min-h-0 flex-1 shrink grid-cols-2 flex-col gap-2 p-4 md:h-screen">
+            <div className="flex flex-col justify-between md:flex-row">
+                <div className="flex flex-row items-center justify-between gap-2">
+                    <div className="text-2xl font-black">Total score</div>
+                    <div className="text-2xl font-medium">{totalScore}</div>
+                </div>
+                <div className="flex flex-row items-center justify-between gap-2">
+                    <div className="text-2xl font-black">Target score</div>
+                    <div className="text-2xl font-medium">{targetScore}</div>
+                </div>
+            </div>
+
+            <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-auto">
+                {/* If something weird happens here, Dan told me so */}
+                {sortedScoreCardEntries.map((entry) => (
+                    <ScoreCardEntry {...entry} />
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export function ActiveGameUi() {
+    const {
+        stateMachine: {
+            currentGame: { totalScore, targetScore },
+        },
+        invoke,
+        devMode,
+    } = useStore() as StagedState<ActiveGameState>;
+
     function devModeWin() {
         invoke({
             type: 'ForceStageChange',
@@ -132,54 +202,9 @@ export function ActiveGameUi() {
 
     return (
         <div className="flex h-screen grid-cols-2 flex-col items-center md:grid md:h-auto">
-            <div className="h-auto w-full space-y-4 p-4 md:w-auto">
-                <div className="flex w-full flex-row justify-between gap-2">
-                    {dice.map((value, index) => (
-                        <Die key={index} value={value} index={index} />
-                    ))}
-                </div>
-                <div className="flex flex-row gap-2">
-                    <button
-                        className={cn(
-                            'flex h-full flex-1 flex-col items-center justify-center rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4',
-                            rerolls > 0 && 'hover:from-red-600 hover:to-red-900',
-                            rerolls === 0 && 'cursor-not-allowed from-red-800 to-red-950',
-                        )}
-                        onClick={() => invoke({ type: 'RollDice' })}
-                    >
-                        <div className="flex flex-row">
-                            <DicesIcon className="mr-2" /> Roll
-                        </div>
-                        <div className="italic text-red-300">({rerolls} rerolls)</div>
-                    </button>
-                    <button
-                        className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-7 hover:from-emerald-600 hover:to-emerald-900"
-                        onClick={() => invoke({ type: 'SortDice' })}
-                    >
-                        <ArrowUpDownIcon />
-                    </button>
-                </div>
-            </div>
+            <Dice />
 
-            <div className="flex min-h-0 flex-1 shrink grid-cols-2 flex-col gap-2 p-4 md:h-screen">
-                <div className="flex flex-col justify-between md:flex-row">
-                    <div className="flex flex-row items-center justify-between gap-2">
-                        <div className="text-2xl font-black">Total score</div>
-                        <div className="text-2xl font-medium">{totalScore}</div>
-                    </div>
-                    <div className="flex flex-row items-center justify-between gap-2">
-                        <div className="text-2xl font-black">Target score</div>
-                        <div className="text-2xl font-medium">{targetScore}</div>
-                    </div>
-                </div>
-
-                <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 overflow-auto">
-                    {/* If something weird happens here, Dan told me so */}
-                    {sortedScoreCardEntries.map((entry) => (
-                        <ScoreCardEntry {...entry} />
-                    ))}
-                </div>
-            </div>
+            <ScoreCard />
 
             {devMode && (
                 <div className="absolute bottom-0 left-0 space-x-2 p-4">
