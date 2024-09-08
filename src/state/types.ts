@@ -57,6 +57,7 @@ export type State = {
     devMode: boolean;
 
     scoreCardContents: ScoreCardEntryId[];
+    dice: number;
     money: number;
     rerolls: number;
     completedGames: number;

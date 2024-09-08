@@ -49,8 +49,14 @@ export const ToggleDiceTransition: Transition<ToggleDiceTransitionInvocation> = 
     permittedStates: ['ActiveGame'],
     invoke: (state, { index }) => {
         const currentGame = (state.stateMachine as WritableDraft<ActiveGameState>).currentGame;
+        const selectedDiceCount = currentGame.selectedDice.length;
+        const isDiceSelected = currentGame.selectedDice.includes(index);
 
-        currentGame.selectedDice = currentGame.selectedDice.includes(index)
+        if (selectedDiceCount === 5 && !isDiceSelected) {
+            throw new Error('Cannot select more than 5 dice');
+        }
+
+        currentGame.selectedDice = isDiceSelected
             ? currentGame.selectedDice.filter((i) => i !== index)
             : currentGame.selectedDice.concat(index);
     },

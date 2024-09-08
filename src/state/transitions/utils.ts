@@ -24,7 +24,7 @@ export function createGame(state: WritableDraft<State>): ActiveGameState {
     return {
         stage: 'ActiveGame',
         currentGame: {
-            dice: [0, 0, 0, 0, 0],
+            dice: range(1, state.dice).map(() => 0),
             selectedDice: [],
             rerolls: state.rerolls + 1,
 
