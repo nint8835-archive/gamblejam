@@ -139,7 +139,7 @@ export function ActiveGameUi() {
     }
 
     return (
-        <div className="flex h-screen grid-cols-2 flex-col items-center gap-2 md:grid md:h-auto">
+        <div className="flex h-screen grid-cols-2 flex-col items-center md:grid md:h-auto">
             <div className="h-auto w-full space-y-4 p-4 md:w-auto">
                 <div className="flex w-full flex-row justify-between gap-2">
                     {dice.map((value, index) => (
