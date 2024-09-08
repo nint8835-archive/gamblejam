@@ -1,17 +1,8 @@
-import {
-    arrow,
-    FloatingArrow,
-    offset,
-    useFloating,
-    useHover,
-    useInteractions,
-    useTransitionStyles,
-} from '@floating-ui/react';
 import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
-import { useRef, useState } from 'react';
 import { ScoreCardEntries, ScoreCardEntry as ScoreCardEntryType } from '../definitions/scorecard';
 import { useStore } from '../state/state';
 import type { ActiveGameState, StagedState } from '../state/types';
+import { scoreEntry } from '../state/utils';
 import { cn } from '../util';
 
 function Die({ value, index }: { value: number; index: number }) {
@@ -41,10 +32,11 @@ type ScoreCardEntryProps = ScoreCardEntryType & {
     className?: string;
 };
 
-function ScoreCardEntry({ name, description, scoreFunc, className, index }: ScoreCardEntryProps) {
+function ScoreCardEntry({ name, description, className, index }: ScoreCardEntryProps) {
     const {
+        stateMachine,
         stateMachine: {
-            currentGame: { dice, scoreCardValues },
+            currentGame: { scoreCardValues, selectedDice },
         },
         invoke,
     } = useStore() as StagedState<ActiveGameState>;
@@ -54,8 +46,16 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
     const otherCount = scoreCardValues
         .filter((entry) => entry.entryId === entryId)
         .filter((entry) => entry.value === null).length;
-    const score = scoredValue === null ? scoreFunc(dice) : scoredValue;
+    const score = scoredValue === null ? scoreEntry(stateMachine, entryId) : scoredValue;
     const nonScoring = score === 0 && !locked;
+    const sufficientDiceSelected = selectedDice.length === 5;
+
+    function onClick() {
+        if (!sufficientDiceSelected) return;
+        if (locked) return;
+
+        invoke({ type: 'UpdateScoreCardValue', index, value: score });
+    }
 
     return (
         <div
@@ -63,9 +63,10 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
                 'flex flex-row items-center justify-between rounded-md border-2 border-zinc-600 p-2 transition-all',
                 className,
                 locked && 'bg-sky-800',
-                !locked && 'cursor-pointer hover:bg-sky-950',
+                !locked && sufficientDiceSelected && 'cursor-pointer hover:bg-sky-950',
+                !sufficientDiceSelected && 'cursor-not-allowed opacity-50',
             )}
-            onClick={() => invoke({ type: 'UpdateScoreCardValue', index, value: score })}
+            onClick={onClick}
         >
             <div>
                 <div className={cn('text-2xl font-bold transition-colors', nonScoring && 'text-zinc-500')}>{name}</div>
@@ -79,29 +80,20 @@ function ScoreCardEntry({ name, description, scoreFunc, className, index }: Scor
 
 export function ActiveGameUi() {
     const {
+        stateMachine,
         stateMachine: {
-            currentGame: { dice, totalScore, rerolls, selectedDice, scoreCardValues, targetScore },
+            currentGame: { dice, totalScore, rerolls, scoreCardValues, targetScore },
         },
         invoke,
         devMode,
     } = useStore() as StagedState<ActiveGameState>;
-    const [isOpen, setIsOpen] = useState(false);
-    const arrowRef = useRef(null);
-    const { refs, floatingStyles, context } = useFloating({
-        open: isOpen,
-        onOpenChange: setIsOpen,
-        middleware: [arrow({ element: arrowRef }), offset(7)],
-    });
-    const { isMounted, styles: transitionStyles } = useTransitionStyles(context);
-    const hover = useHover(context);
-    const { getReferenceProps, getFloatingProps } = useInteractions([hover]);
 
     const sortedScoreCardEntries = scoreCardValues
         .map((entry, index) => ({
             key: index,
             index,
             ...ScoreCardEntries[entry.entryId],
-            score: ScoreCardEntries[entry.entryId].scoreFunc(dice),
+            score: scoreEntry(stateMachine, entry.entryId),
             scoreCardValue: entry.value,
             locked: entry.value !== null,
         }))
@@ -154,28 +146,12 @@ export function ActiveGameUi() {
                             rerolls === 0 && 'cursor-not-allowed from-red-800 to-red-950',
                         )}
                         onClick={() => invoke({ type: 'RollDice' })}
-                        ref={refs.setReference}
-                        {...getReferenceProps()}
                     >
                         <div className="flex flex-row">
                             <DicesIcon className="mr-2" /> Roll
                         </div>
                         <div className="italic text-red-300">({rerolls} rerolls)</div>
                     </button>
-                    {isMounted && selectedDice.length === 0 && rerolls > 0 && (
-                        <div
-                            ref={refs.setFloating}
-                            style={{ ...floatingStyles, ...transitionStyles }}
-                            {...getFloatingProps()}
-                        >
-                            <FloatingArrow ref={arrowRef} context={context} fill="#3f3f46" />
-                            <div className="rounded-md bg-zinc-700 p-2 text-center">
-                                You have no dice selected, so all dice will be rolled.
-                                <br />
-                                Click a die to select the dice to reroll.
-                            </div>
-                        </div>
-                    )}
                     <button
                         className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-7 hover:from-emerald-600 hover:to-emerald-900"
                         onClick={() => invoke({ type: 'SortDice' })}

@@ -3,21 +3,24 @@ import type { ActiveGameState, Transition } from '../types';
 
 export type RollDiceTransitionInvocation = {
     type: 'RollDice';
+    rollAllDice?: boolean;
 };
 
 export const RollDiceTransition: Transition<RollDiceTransitionInvocation> = {
     permittedStates: ['ActiveGame'],
-    invoke: (state, _) => {
+    invoke: (state, { rollAllDice }) => {
         const currentGame = (state.stateMachine as WritableDraft<ActiveGameState>).currentGame;
+
+        if (!rollAllDice && (currentGame.selectedDice.length < 1 || currentGame.selectedDice.length > 5)) {
+            throw new Error('Cannot roll dice with less than 1 or more than 5 selected dice');
+        }
 
         if (currentGame.rerolls <= 0) {
             throw new Error('Cannot roll dice with no rerolls remaining');
         }
 
         currentGame.dice = currentGame.dice.map((die, index) =>
-            currentGame.selectedDice.includes(index) || currentGame.selectedDice.length === 0
-                ? Math.floor(Math.random() * 6) + 1
-                : die,
+            currentGame.selectedDice.includes(index) || rollAllDice ? Math.floor(Math.random() * 6) + 1 : die,
         );
         currentGame.rerolls--;
     },
@@ -117,7 +120,7 @@ export const UpdateScoreCardValueTransition: Transition<UpdateScoreCardValueTran
         if (currentGame.scoreCardValues.some(({ value }) => value === null)) {
             ResetRerollsTransition.invoke(state, { type: 'ResetRerolls' });
             UnselectDiceTransition.invoke(state, { type: 'UnselectDice' });
-            RollDiceTransition.invoke(state, { type: 'RollDice' });
+            RollDiceTransition.invoke(state, { type: 'RollDice', rollAllDice: true });
         } else {
             state.stateMachine = {
                 stage: 'GameLost',

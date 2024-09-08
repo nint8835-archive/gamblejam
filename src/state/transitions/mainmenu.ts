@@ -21,7 +21,7 @@ export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
             },
         };
 
-        RollDiceTransition.invoke(state, { type: 'RollDice' });
+        RollDiceTransition.invoke(state, { type: 'RollDice', rollAllDice: true });
     },
 };
 

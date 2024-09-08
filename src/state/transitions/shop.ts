@@ -3,6 +3,7 @@ import { type ItemId, Items } from '../../definitions/items';
 import { ScoreCardEntries, type ScoreCardEntryId } from '../../definitions/scorecard';
 import { range } from '../../util';
 import type { ShopState, StagedState, State, Transition } from '../types';
+import { RollDiceTransition } from './activegame';
 
 export function rollShop(state: WritableDraft<State>): ShopState {
     const allScoreCardEntries = Object.keys(ScoreCardEntries) as ScoreCardEntryId[];
@@ -110,6 +111,8 @@ export const ExitShopTransition: Transition<ExitShopTransitionInvocation> = {
                 targetScore: 100,
             },
         };
+
+        RollDiceTransition.invoke(state, { type: 'RollDice', rollAllDice: true });
     },
 };
 
