@@ -1,25 +1,9 @@
 import { WritableDraft } from 'immer';
-import { type ItemId, Items } from '../../definitions/items';
-import { ScoreCardEntries, type ScoreCardEntryId } from '../../definitions/scorecard';
-import { range } from '../../util';
-import type { ShopState, StagedState, State, Transition } from '../types';
+import { Items } from '../../definitions/items';
+import { ScoreCardEntries } from '../../definitions/scorecard';
+import type { ShopState, StagedState, Transition } from '../types';
 import { RollDiceTransition } from './activegame';
-
-export function rollShop(state: WritableDraft<State>): ShopState {
-    const allScoreCardEntries = Object.keys(ScoreCardEntries) as ScoreCardEntryId[];
-    const allItems = Object.keys(Items) as ItemId[];
-
-    const currentRerollCost = state.stateMachine.stage === 'Shop' ? state.stateMachine.rerollCost : 1;
-
-    return {
-        stage: 'Shop',
-        rerollCost: Math.ceil(currentRerollCost * 1.35),
-        availableScoreCardEntries: range(0, 2).map(
-            () => allScoreCardEntries[Math.floor(Math.random() * allScoreCardEntries.length)],
-        ),
-        availableItems: range(0, 2).map(() => allItems[Math.floor(Math.random() * allItems.length)]),
-    };
-}
+import { createGame, rollShop } from './utils';
 
 export type BuyScoreCardEntryTransitionInvocation = {
     type: 'BuyScoreCardEntry';
@@ -100,17 +84,7 @@ export type ExitShopTransitionInvocation = {
 export const ExitShopTransition: Transition<ExitShopTransitionInvocation> = {
     permittedStates: ['Shop'],
     invoke: (state, _) => {
-        state.stateMachine = {
-            stage: 'ActiveGame',
-            currentGame: {
-                dice: [0, 0, 0, 0, 0],
-                selectedDice: [],
-                rerolls: state.rerolls + 1,
-                scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
-                totalScore: 0,
-                targetScore: 100,
-            },
-        };
+        state.stateMachine = createGame(state);
 
         RollDiceTransition.invoke(state, { type: 'RollDice', rollAllDice: true });
     },

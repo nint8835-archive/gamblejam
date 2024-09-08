@@ -1,5 +1,5 @@
 import type { Transition } from '../types';
-import { rollShop } from './shop';
+import { rollShop } from './utils';
 
 export type GameContinueInvocation = {
     type: 'Continue';

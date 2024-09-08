@@ -59,6 +59,7 @@ export type State = {
     scoreCardContents: ScoreCardEntryId[];
     money: number;
     rerolls: number;
+    completedGames: number;
 };
 
 export type Actions = {

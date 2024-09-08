@@ -114,6 +114,7 @@ export const UpdateScoreCardValueTransition: Transition<UpdateScoreCardValueTran
                 totalEarnings: moneyEarned,
             };
             state.money += moneyEarned;
+            state.completedGames++;
             return;
         }
 

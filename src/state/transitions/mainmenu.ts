@@ -1,5 +1,6 @@
 import type { Transition } from '../types';
 import { RollDiceTransition } from './activegame';
+import { createGame } from './utils';
 
 export type BeginGameTransitionInvocation = {
     type: 'BeginGame';
@@ -8,18 +9,7 @@ export type BeginGameTransitionInvocation = {
 export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
     permittedStates: ['MainMenu'],
     invoke: (state, _) => {
-        state.stateMachine = {
-            stage: 'ActiveGame',
-            currentGame: {
-                dice: [0, 0, 0, 0, 0],
-                selectedDice: [],
-                rerolls: state.rerolls + 1,
-
-                scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
-                totalScore: 0,
-                targetScore: 100,
-            },
-        };
+        state.stateMachine = createGame(state);
 
         RollDiceTransition.invoke(state, { type: 'RollDice', rollAllDice: true });
     },
