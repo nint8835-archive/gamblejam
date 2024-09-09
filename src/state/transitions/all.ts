@@ -3,11 +3,13 @@ import type { CompleteState, Transition } from '../types';
 import { ActiveGameTransitionInvocations, ActiveGameTransitions } from './activegame';
 import { DevTransitionInvocations, DevTransitions } from './dev';
 import { GameEndTransitionInvocations, GameEndTransitions } from './gameend';
+import { LoadoutSelectTransitionInvocations, LoadoutSelectTransitions } from './loadoutselect';
 import { MainMenuTransitions, type MainMenuTransitionInvocations } from './mainmenu';
 import { ShopTransitions, type ShopTransitionInvocations } from './shop';
 
 export type TransitionInvocation =
     | MainMenuTransitionInvocations
+    | LoadoutSelectTransitionInvocations
     | ActiveGameTransitionInvocations
     | GameEndTransitionInvocations
     | ShopTransitionInvocations
@@ -19,6 +21,7 @@ type TransitionHandlers<T extends { type: string }> = {
 
 const transitions: TransitionHandlers<TransitionInvocation> = {
     ...MainMenuTransitions,
+    ...LoadoutSelectTransitions,
     ...ActiveGameTransitions,
     ...GameEndTransitions,
     ...ShopTransitions,

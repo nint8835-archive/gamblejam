@@ -7,6 +7,10 @@ export type MainMenuState = {
     stage: 'MainMenu';
 };
 
+export type LoadoutSelectState = {
+    stage: 'LoadoutSelect';
+};
+
 export type ScoreCardValue = {
     entryId: ScoreCardEntryId;
     value: number | null;
@@ -47,7 +51,13 @@ export type ShopState = {
     availableItems: ItemId[];
 };
 
-export type StateMachine = MainMenuState | ActiveGameState | GameLostState | GameWonState | ShopState;
+export type StateMachine =
+    | MainMenuState
+    | LoadoutSelectState
+    | ActiveGameState
+    | GameLostState
+    | GameWonState
+    | ShopState;
 
 export type Stage = StateMachine['stage'];
 

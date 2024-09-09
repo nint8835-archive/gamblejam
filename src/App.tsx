@@ -4,11 +4,13 @@ import type { Stage } from './state/types';
 import { ActiveGameUi } from './uis/ActiveGame';
 import { GameLostUi } from './uis/GameLost';
 import { GameWonUi } from './uis/GameWon';
+import { LoadoutSelectUi } from './uis/LoadoutSelect';
 import { MainMenuUi } from './uis/MainMenu';
 import { ShopUi } from './uis/Shop';
 
 const stageComponents: Record<Stage, FunctionComponent> = {
     MainMenu: MainMenuUi,
+    LoadoutSelect: LoadoutSelectUi,
     ActiveGame: ActiveGameUi,
     GameLost: GameLostUi,
     GameWon: GameWonUi,

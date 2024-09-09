@@ -1,6 +1,4 @@
 import type { Transition } from '../types';
-import { RollDiceTransition } from './activegame';
-import { createGame } from './utils';
 
 export type BeginGameTransitionInvocation = {
     type: 'BeginGame';
@@ -9,9 +7,9 @@ export type BeginGameTransitionInvocation = {
 export const BeginGameTransition: Transition<BeginGameTransitionInvocation> = {
     permittedStates: ['MainMenu'],
     invoke: (state, _) => {
-        state.stateMachine = createGame(state);
-
-        RollDiceTransition.invoke(state, { type: 'RollDice', rollAllDice: true });
+        state.stateMachine = {
+            stage: 'LoadoutSelect',
+        };
     },
 };
 
