@@ -30,7 +30,7 @@ export function createGame(state: WritableDraft<State>): ActiveGameState {
 
             scoreCardValues: state.scoreCardContents.map((entryId) => ({ entryId, value: null })),
             totalScore: 0,
-            targetScore: 100 * Math.pow(1.35, state.completedGames),
+            targetScore: Math.floor(100 * Math.pow(1.35, state.completedGames)),
         },
     };
 }
