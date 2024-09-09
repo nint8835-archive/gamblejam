@@ -1,9 +1,9 @@
-import { ArrowUpDownIcon, DicesIcon } from 'lucide-react';
+import { ArrowUpDownIcon, ComputerIcon, DicesIcon } from 'lucide-react';
 import { ScoreCardEntries, ScoreCardEntry as ScoreCardEntryType } from '../definitions/scorecard';
 import { useStore } from '../state/state';
 import type { ActiveGameState, StagedState } from '../state/types';
 import { scoreEntry } from '../state/utils';
-import { cn } from '../util';
+import { cn, combinations, range } from '../util';
 
 function Die({ value, index }: { value: number; index: number }) {
     const {
@@ -78,13 +78,42 @@ function ScoreCardEntry({ name, description, className, index }: ScoreCardEntryP
     );
 }
 
+function getMostValuableDiceIndices(state: ActiveGameState): number[] {
+    const {
+        currentGame: { dice, scoreCardValues },
+    } = state;
+
+    const unusedScoreCardEntries = scoreCardValues
+        .filter((entry) => entry.value === null)
+        .map((entry) => entry.entryId)
+        .filter((entry, index, self) => self.indexOf(entry) === index);
+
+    const diceCombinations = combinations(range(0, dice.length), 5);
+
+    return diceCombinations
+        .map((combination) => ({
+            combination,
+            score: unusedScoreCardEntries
+                .map((entry) => ScoreCardEntries[entry].scoreFunc(combination.map((index) => dice[index])))
+                .sort((a, b) => b - a)[0],
+        }))
+        .sort((a, b) => b.score - a.score)[0].combination;
+}
+
 function Dice() {
     const {
+        stateMachine,
         stateMachine: {
             currentGame: { dice, rerolls },
         },
         invoke,
     } = useStore() as StagedState<ActiveGameState>;
+
+    function selectMostValuableDice() {
+        const mostValuableDiceIndices = getMostValuableDiceIndices(stateMachine);
+        invoke({ type: 'UnselectDice' });
+        mostValuableDiceIndices.forEach((index) => invoke({ type: 'ToggleDice', index }));
+    }
 
     return (
         <div className="h-auto w-full space-y-4 p-4 md:w-auto">
@@ -94,6 +123,13 @@ function Dice() {
                 ))}
             </div>
             <div className="flex flex-row gap-2">
+                <button
+                    className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-purple-500 to-purple-800 p-7 hover:from-purple-600 hover:to-purple-900"
+                    onClick={selectMostValuableDice}
+                    title="Select most valuable dice"
+                >
+                    <ComputerIcon />
+                </button>
                 <button
                     className={cn(
                         'flex h-full flex-1 flex-col items-center justify-center rounded-md bg-gradient-to-b from-red-500 to-red-800 p-4',
@@ -110,6 +146,7 @@ function Dice() {
                 <button
                     className="flex aspect-square h-full items-center justify-center rounded-md bg-gradient-to-b from-emerald-500 to-emerald-800 p-7 hover:from-emerald-600 hover:to-emerald-900"
                     onClick={() => invoke({ type: 'SortDice' })}
+                    title="Sort dice"
                 >
                     <ArrowUpDownIcon />
                 </button>
